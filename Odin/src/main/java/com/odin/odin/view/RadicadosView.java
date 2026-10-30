@@ -68,6 +68,12 @@ public class RadicadosView {
     private DocumentosService documentosService;
 
     @Autowired
+    private com.odin.odin.service.ConsecutivoRadicadoService consecutivoService;
+
+    @Autowired
+    private com.odin.odin.repository.RemitentesExternosRepository remitentesRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Value("${app.upload-dir:uploads}")
@@ -262,18 +268,16 @@ public class RadicadosView {
             String uri) {
 
         /*
-         * Generamos número automáticamente
-         * cuando el formulario no lo trae.
+         * Generamos número atómicamente con ConsecutivoRadicadoService (E-YYYY-XXXXXX).
          */
         if (!tieneTexto(radicado.getNumero_radicado())) {
             String tipo = tieneTexto(radicado.getTipoRadicacion())
                     ? radicado.getTipoRadicacion()
                     : radicado.getTipo_radicado();
-            String numero = jdbcTemplate.queryForObject(
-                    "select public.siguiente_numero_radicado(?)",
-                    String.class,
-                    tipo
-            );
+            if (!tieneTexto(tipo)) {
+                tipo = "ENTRADA";
+            }
+            String numero = consecutivoService.siguienteNumeroRadicado(tipo);
             radicado.setNumero_radicado(numero);
         }
 
@@ -444,18 +448,45 @@ public class RadicadosView {
         }
 
         /*
-         * REMITENTE
+         * REMITENTE Y RADICACIÓN ANÓNIMA (RF-09)
          */
-        if (!tieneTexto(
-                radicado.getRemitente()
-        )) {
+        boolean esAnonimo = Boolean.TRUE.equals(radicado.getAnonimo())
+                || "ANONIMO".equalsIgnoreCase(radicado.getRemitente())
+                || "ANÓNIMO".equalsIgnoreCase(radicado.getRemitente());
 
-            radicado.setRemitente(
-                    valorODefecto(
-                            radicado.getResponsable(),
-                            "Anónimo"
-                    )
-            );
+        if (esAnonimo) {
+            radicado.setRemitente("ANÓNIMO (Ley de Transparencia)");
+            radicado.setId_remitente(null);
+        } else {
+            if (!tieneTexto(radicado.getRemitente())) {
+                radicado.setRemitente(valorODefecto(radicado.getResponsable(), "Anónimo"));
+            }
+
+            // Gestionar o sincronizar con tabla remitentes_externos si trae documento
+            if (tieneTexto(radicado.getNumeroIdentificacion())) {
+                try {
+                    String numDoc = radicado.getNumeroIdentificacion().trim();
+                    var optRem = remitentesRepository.findByNumIdentificacion(numDoc);
+                    if (optRem.isPresent()) {
+                        radicado.setId_remitente(optRem.get().getId_remitente());
+                    } else {
+                        com.odin.odin.model.RemitentesExternos nuevoRem = com.odin.odin.model.RemitentesExternos.builder()
+                                .num_identificacion(numDoc)
+                                .tipo_identificacion(tieneTexto(radicado.getTipoDocumento()) ? radicado.getTipoDocumento() : "CC")
+                                .nombre(radicado.getRemitente())
+                                .apellido("")
+                                .correo(radicado.getCorreo())
+                                .telefono(radicado.getTelefono())
+                                .direccion(radicado.getCiudad())
+                                .fecha_registro(LocalDateTime.now().toString())
+                                .build();
+                        var guardado = remitentesRepository.save(nuevoRem);
+                        radicado.setId_remitente(guardado.getId_remitente());
+                    }
+                } catch (Exception e) {
+                    // Si ocurre un error al persistir remitente externo, no bloquear la radicación
+                }
+            }
         }
 
         /*
@@ -485,6 +516,7 @@ public class RadicadosView {
         }
 
         int guardados = 0;
+        int maxArchivos = 5;
 
         try {
 
@@ -500,6 +532,10 @@ public class RadicadosView {
 
             for (MultipartFile archivo
                     : archivos) {
+
+                if (guardados >= maxArchivos) {
+                    break;
+                }
 
                 if (archivo == null
                         || archivo.isEmpty()) {

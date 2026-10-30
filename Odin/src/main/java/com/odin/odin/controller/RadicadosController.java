@@ -33,6 +33,7 @@ public class RadicadosController {
     @Autowired private ComprobanteRadicacionService comprobanteService;
     @Autowired private AuditoriaRadicadosService auditoriaService;
     @Autowired private com.odin.odin.service.RadicadoPlazoService plazoService;
+    @Autowired private com.odin.odin.service.ConsecutivoRadicadoService consecutivoService;
 
     @GetMapping
     @Operation(summary="Listar radicados")
@@ -223,6 +224,28 @@ public class RadicadosController {
     @Operation(summary="Crear radicado")
     public Radicados create(
             @RequestBody Radicados radicado) {
+
+        if (radicado.getNumero_radicado() == null || radicado.getNumero_radicado().trim().isEmpty()) {
+            String tipo = radicado.getTipo_radicado() != null ? radicado.getTipo_radicado() : radicado.getTipoRadicacion();
+            if (tipo == null || tipo.trim().isEmpty()) tipo = "ENTRADA";
+            radicado.setNumero_radicado(consecutivoService.siguienteNumeroRadicado(tipo));
+            radicado.setTipo_radicado(tipo);
+        }
+
+        if (radicado.getId_estado() == null) {
+            radicado.setId_estado(1L); // 1 = Pendiente
+        }
+
+        if (radicado.getFecha_radicado() == null || radicado.getFecha_radicado().trim().isEmpty()) {
+            radicado.setFecha_radicado(java.time.LocalDate.now().toString());
+        }
+
+        if (Boolean.TRUE.equals(radicado.getAnonimo())) {
+            radicado.setRemitente("ANÓNIMO (Ley de Transparencia)");
+            radicado.setId_remitente(null);
+        } else if (radicado.getRemitente() == null || radicado.getRemitente().trim().isEmpty()) {
+            radicado.setRemitente("Anónimo");
+        }
 
         plazoService.aplicarReglas(radicado);
         Radicados saved =

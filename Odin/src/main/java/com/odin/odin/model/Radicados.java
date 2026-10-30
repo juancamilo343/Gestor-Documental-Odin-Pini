@@ -21,7 +21,9 @@ public class Radicados {
     @Column(name = "id_radicado")
     private Long id_radicado;
 
-    @NotNull(message = "el numero de radicado es obligatorio")
+    @Column(name = "id_remitente")
+    private Long id_remitente;
+
     @Column(name = "numero_radicado")
     private String numero_radicado;
 
@@ -61,7 +63,6 @@ public class Radicados {
     @JoinColumn(name = "codigo_subserie", referencedColumnName = "codigo_subserie", insertable = false, updatable = false)
     private Subseries subserie;
 
-    @NotBlank(message = "el remitente es obligatorio")
     @Column(name = "remitente")
     private String remitente;
 
@@ -140,6 +141,7 @@ public class Radicados {
     @Transient private String descripcion;
     @Transient private String dependenciaResponsable;
     @Transient private String tipoDocumental;
+    @Transient private Boolean anonimo;
 
     /** Días restantes hasta fecha límite/vencimiento (calculado en vista, no persistido). */
     @Transient private Integer diasRestantes;

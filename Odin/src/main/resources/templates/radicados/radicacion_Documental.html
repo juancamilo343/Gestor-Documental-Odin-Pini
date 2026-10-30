@@ -3,28 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nueva Radicación | ODIN</title>
+    <title>Radicación de Entrada | ODIN</title>
     <script>
       try { if (localStorage.getItem('odin-theme') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/globals.css}">
     <link rel="stylesheet" th:href="@{/css/styleguide.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/odin.css}">
     <link rel="stylesheet" th:href="@{/css/odin-dark.css}">
     <style>
-        .form-card{background:#fff;border:1px solid #e2e8f0;border-radius:1rem;padding:1.5rem;margin-bottom:1rem}
-        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-        @media (max-width:768px){.form-grid{grid-template-columns:1fr}}
-        .form-grid label,.form-card label{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:.3rem}
-        .form-grid input,.form-grid select,.form-grid textarea,
-        .form-card input,.form-card select,.form-card textarea{width:100%;border:1px solid #cbd5e1;border-radius:.5rem;padding:.55rem .75rem;font-size:.875rem}
-        .btn-primary{background:#15803d;color:#fff;border:none;border-radius:.5rem;padding:.65rem 1.25rem;font-weight:700;cursor:pointer}
-        .btn-secondary{background:#fff;color:#334155;border:1px solid #cbd5e1;border-radius:.5rem;padding:.65rem 1.25rem;font-weight:600;text-decoration:none}
-        .anon-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:.75rem;padding:1rem;margin-bottom:1rem}
-        .section-title{font-size:1rem;font-weight:700;color:#0f172a;margin:0 0 1rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0}
-        .hint{font-size:.75rem;color:#94a3b8;margin-top:.2rem}
+        .form-card { background:#fff; border:1px solid #e2e8f0; border-radius:1rem; padding:1.5rem; margin-bottom:1rem; }
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+        @media (max-width:768px) { .form-grid { grid-template-columns:1fr; } }
+        .form-grid label, .form-card label { display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:#64748b; margin-bottom:.3rem; }
+        .form-grid input, .form-grid select, .form-grid textarea,
+        .form-card input, .form-card select, .form-card textarea { width:100%; border:1px solid #cbd5e1; border-radius:.5rem; padding:.55rem .75rem; font-size:.875rem; transition: border-color .15s ease-in-out; }
+        .form-grid input:focus, .form-grid select:focus, .form-card textarea:focus { border-color: #15803d; outline: none; }
+        .btn-primary { background:#15803d; color:#fff; border:none; border-radius:.5rem; padding:.65rem 1.25rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:.5rem; }
+        .btn-primary:hover { background:#166534; }
+        .btn-secondary { background:#fff; color:#334155; border:1px solid #cbd5e1; border-radius:.5rem; padding:.65rem 1.25rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; }
+        .btn-secondary:hover { background:#f1f5f9; }
+        .anon-box { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:.75rem; padding:1rem; margin-bottom:1rem; }
+        .section-title { font-size:1rem; font-weight:700; color:#0f172a; margin:0 0 1rem; padding-bottom:.5rem; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; gap:.5rem; }
+        .hint { font-size:.75rem; color:#94a3b8; margin-top:.2rem; }
+        
+        /* Dropzone estilo Drag & Drop */
+        .dropzone-box { border: 2px dashed #94a3b8; border-radius: .75rem; padding: 1.75rem 1rem; text-align: center; cursor: pointer; transition: all .2s; background: #f8fafc; }
+        .dropzone-box:hover, .dropzone-box.dragover { border-color: #15803d; background: #f0fdf4; }
+        .file-item { display: flex; align-items: center; justify-content: space-between; padding: .5rem .75rem; background: #f1f5f9; border-radius: .5rem; margin-top: .5rem; font-size: .82rem; }
+        .file-remove { color: #ef4444; cursor: pointer; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
+        .file-remove:hover { background: #fee2e2; }
     </style>
 </head>
 <body class="bg-[#f5f6f8] text-slate-800">
@@ -37,32 +48,42 @@
 
         <main class="p-4 sm:p-6">
             <div class="max-w-4xl mx-auto">
-                <h1 class="odin-page-title text-2xl font-bold mb-1">Registrar radicado</h1>
-                <p class="text-slate-600 mb-4">Formulario completo · RF-04 a RF-23 (incluye anónima y forma de respuesta)</p>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 class="odin-page-title text-2xl font-bold mb-1">Radicación de Entrada</h1>
+                        <p class="text-slate-600 text-sm">Registro oficial de comunicaciones externas hacia la entidad (RF-04 a RF-23)</p>
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                        <i class="fas fa-inbox mr-1"></i> Tipo Oficial: ENTRADA
+                    </span>
+                </div>
 
-                <form th:action="@{/view/radicados/guardar}" th:object="${radicado}" method="post" enctype="multipart/form-data">
+                <div th:if="${success}" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 border border-green-200">
+                    <i class="fas fa-check-circle mr-1"></i> <span th:text="${success}"></span>
+                </div>
+
+                <form id="formRadicacion" th:action="@{/view/radicados/save}" th:object="${radicado}" method="post" enctype="multipart/form-data">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
-                    <!-- Tipo de radicación y consecutivo -->
+                    <!-- 1. Tipo y canal -->
                     <div class="form-card">
-                        <h2 class="section-title">Tipo y canal</h2>
+                        <h2 class="section-title"><i class="fas fa-file-invoice text-emerald-600"></i> Tipo de Radicación y Canal de Recepción</h2>
                         <div class="form-grid">
                             <div>
                                 <label>Tipo de radicación *</label>
-                                <select th:field="*{tipoRadicacion}" required>
-                                    <option value="ENTRADA">Entrada (E-)</option>
-                                    <option value="SALIDA">Salida (S-)</option>
-                                    <option value="INTERNO">Interno</option>
-                                </select>
-                                <p class="hint">El consecutivo se genera automáticamente según el tipo y vigencia (RF-05, RF-06).</p>
+                                <!-- Campo oculto con el valor garantizado para el servidor -->
+                                <input type="hidden" name="tipoRadicacion" value="ENTRADA">
+                                <!-- Campo visual bloqueado como solo lectura -->
+                                <input type="text" value="ENTRADA (E-YYYY-XXXXXX)" readonly class="bg-slate-100 text-slate-600 font-semibold cursor-not-allowed">
+                                <p class="hint">La radicación inicial es estrictamente de Entrada con consecutivo anual inmutable.</p>
                             </div>
                             <div>
                                 <label>Canal de recepción *</label>
                                 <select th:field="*{canalRecepcion}" required>
-                                    <option value="FISICO">Físico</option>
-                                    <option value="CORREO">Correo electrónico</option>
-                                    <option value="WEB">Portal web</option>
-                                    <option value="OTRO">Otro</option>
+                                    <option value="FISICO">Físico / Ventanilla</option>
+                                    <option value="CORREO">Correo electrónico institucional</option>
+                                    <option value="WEB">Portal web oficial</option>
+                                    <option value="OTRO">Otro canal formal</option>
                                 </select>
                             </div>
                             <div>
@@ -78,48 +99,59 @@
                             </div>
                             <div>
                                 <label>Trámite / tipo de solicitud *</label>
-                                <select th:field="*{id_tramite}" required>
-                                    <option value="">Seleccione...</option>
-                                    <option th:each="t : ${tramites}" th:value="${t.idTramite}" th:text="${t.nombre}">Trámite</option>
+                                <select id="selectTramite" th:field="*{id_tramite}" required onchange="onTramiteChange(this)">
+                                    <option value="">Seleccione un trámite...</option>
+                                    <option th:each="t : ${tramites}" 
+                                            th:value="${t.idTramite}" 
+                                            th:text="${t.nombre}"
+                                            th:data-dias="${t.diasRespuesta}"
+                                            th:data-prioridad="${t.prioridadDefault}"
+                                            th:data-dependencia="${t.idDependenciaResponsable}">Trámite</option>
                                 </select>
+                                <p class="hint">Al seleccionar el trámite se auto-calcula la prioridad, fecha límite y dependencia.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- RF-09: Radicación anónima -->
-                    <div class="form-card">
-                        <h2 class="section-title">Remitente</h2>
+                    <!-- 2. Remitente y Radicación Anónima (RF-09) -->
+                    <div class="form-card" id="cardRemitente">
+                        <h2 class="section-title"><i class="fas fa-user-edit text-emerald-600"></i> Remitente / Solicitante Externo</h2>
                         <div class="anon-box">
                             <label style="display:flex;align-items:center;gap:.5rem;text-transform:none;font-size:.9rem;font-weight:600;color:#166534;cursor:pointer">
                                 <input type="checkbox" id="anonimo" name="anonimo" value="true" onchange="toggleAnonimo(this)">
-                                Radicación anónima (sin datos del remitente) — RF-09
+                                <span>Radicación anónima (Ley de Transparencia RF-09) — No exige identificación</span>
                             </label>
                         </div>
                         <div id="remitente-fields" class="form-grid">
                             <div>
-                                <label>Nombre / Razón social</label>
-                                <input type="text" th:field="*{remitente}" placeholder="Nombre completo o entidad">
+                                <label>Número de identificación (Buscar)</label>
+                                <div class="relative">
+                                    <input type="text" id="numeroIdentificacion" th:field="*{numeroIdentificacion}" placeholder="CC / NIT / CE" autocomplete="off">
+                                    <span id="remitenteSpinner" class="hidden absolute right-3 top-2.5 text-xs text-slate-400">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </span>
+                                </div>
+                                <p id="remitenteFeedback" class="hint"></p>
                             </div>
                             <div>
-                                <label>Número de identificación</label>
-                                <input type="text" th:field="*{numeroIdentificacion}" placeholder="CC / NIT / CE">
+                                <label>Nombre / Razón social *</label>
+                                <input type="text" id="remitenteNombre" th:field="*{remitente}" placeholder="Nombre completo o entidad solicitante" required>
                             </div>
                             <div>
                                 <label>Correo electrónico</label>
-                                <input type="email" th:field="*{correo}" placeholder="correo@ejemplo.com">
+                                <input type="email" id="correoSolicitante" th:field="*{correo}" placeholder="correo@ejemplo.com">
                             </div>
                             <div>
                                 <label>Teléfono</label>
-                                <input type="text" th:field="*{telefono}" placeholder="3001234567">
+                                <input type="text" id="telefonoSolicitante" th:field="*{telefono}" placeholder="3001234567">
                             </div>
                             <div>
-                                <label>Ciudad</label>
-                                <input type="text" th:field="*{ciudad}">
+                                <label>Ciudad / Dirección</label>
+                                <input type="text" id="ciudadSolicitante" th:field="*{ciudad}" placeholder="Ciudad o dirección de contacto">
                             </div>
-                            <!-- RF-14: Forma de respuesta -->
                             <div>
                                 <label>Forma de respuesta preferida *</label>
-                                <select name="formaRespuesta" required>
+                                <select id="formaRespuesta" name="formaRespuesta" required>
                                     <option value="ELECTRONICA">Electrónica (correo)</option>
                                     <option value="FISICA">Física (correspondencia)</option>
                                     <option value="PRESENCIAL">Presencial / ventanilla</option>
@@ -129,23 +161,24 @@
                         </div>
                     </div>
 
-                    <!-- Asignación TRD -->
+                    <!-- 3. Asignación y clasificación (CCD/TRD) -->
                     <div class="form-card">
-                        <h2 class="section-title">Asignación y clasificación (CCD/TRD)</h2>
+                        <h2 class="section-title"><i class="fas fa-sitemap text-emerald-600"></i> Asignación y Clasificación Documental</h2>
                         <div class="form-grid">
                             <div>
                                 <label>Dependencia destino *</label>
-                                <select th:field="*{id_dependencia}" required>
-                                    <option value="">Seleccione...</option>
+                                <select id="selectDependencia" th:field="*{id_dependencia}" required onchange="onDependenciaChange(this)">
+                                    <option value="">Seleccione una dependencia...</option>
                                     <option th:each="d : ${dependencias}" th:value="${d.id_dependencia}" th:text="${d.nombre}">Dep</option>
                                 </select>
                             </div>
                             <div>
-                                <label>Responsable (usuario)</label>
-                                <select th:field="*{id_usuario}">
-                                    <option value="">Asignar después</option>
+                                <label>Responsable asignado</label>
+                                <select id="selectResponsable" th:field="*{id_usuario}">
+                                    <option value="">Seleccione funcionario o se asignará automáticamente...</option>
                                     <option th:each="u : ${usuarios}" th:value="${u.id_usuario}" th:text="${u.nombre}">Usuario</option>
                                 </select>
+                                <p id="responsableFeedback" class="hint"></p>
                             </div>
                             <div>
                                 <label>Serie documental</label>
@@ -163,35 +196,35 @@
                             </div>
                             <div>
                                 <label>Prioridad</label>
-                                <select th:field="*{prioridad}">
-                                    <option value="NORMAL">Normal</option>
+                                <select id="selectPrioridad" th:field="*{prioridad}">
+                                    <option value="NORMAL">Normal / Media</option>
                                     <option value="ALTA">Alta</option>
                                     <option value="URGENTE">Urgente</option>
                                 </select>
                             </div>
                             <div>
-                                <label>Fecha de vencimiento (estimada)</label>
-                                <input type="date" th:field="*{fecha_vencimiento}">
-                                <p class="hint">Se calcula automáticamente según días de respuesta del trámite si se deja vacío.</p>
+                                <label>Fecha de vencimiento (calculada)</label>
+                                <input type="date" id="fechaVencimiento" th:field="*{fecha_vencimiento}">
+                                <p class="hint">Calculada automáticamente según los días de respuesta del trámite.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Contenido -->
+                    <!-- 4. Contenido y Archivos Adjuntos (Drag & Drop, máx 5) -->
                     <div class="form-card">
-                        <h2 class="section-title">Contenido del documento</h2>
+                        <h2 class="section-title"><i class="fas fa-folder-open text-emerald-600"></i> Contenido y Archivos Adjuntos</h2>
                         <div style="margin-bottom:1rem">
                             <label>Asunto *</label>
-                            <input type="text" th:field="*{asunto}" required maxlength="500" placeholder="Asunto del documento">
+                            <input type="text" th:field="*{asunto}" required maxlength="500" placeholder="Asunto oficial del radicado">
                         </div>
                         <div style="margin-bottom:1rem">
-                            <label>Descripción / observaciones</label>
-                            <textarea th:field="*{descripcion}" rows="4" placeholder="Descripción breve o notas de radicación"></textarea>
+                            <label>Descripción / Observaciones</label>
+                            <textarea th:field="*{descripcion}" rows="3" placeholder="Observaciones o notas iniciales de la radicación"></textarea>
                         </div>
-                        <div class="form-grid">
+                        <div class="form-grid mb-4">
                             <div>
                                 <label>Número de folios</label>
-                                <input type="number" th:field="*{numeroFolios}" min="0">
+                                <input type="number" th:field="*{numeroFolios}" min="0" placeholder="1">
                             </div>
                             <div>
                                 <label>Soporte</label>
@@ -201,42 +234,238 @@
                                     <option value="HIBRIDO">Híbrido</option>
                                 </select>
                             </div>
-                            <div>
-                                <label>Confidencialidad</label>
-                                <select th:field="*{confidencialidad}">
-                                    <option value="PUBLICA">Pública</option>
-                                    <option value="RESERVADA">Reservada</option>
-                                    <option value="CLASIFICADA">Clasificada</option>
-                                </select>
+                        </div>
+
+                        <!-- Zona de archivos Drag & Drop (Máx 5 archivos, hasta 15MB c/u) -->
+                        <div>
+                            <label>Archivos Digitales Adjuntos (Máximo 5 archivos, hasta 15 MB c/u)</label>
+                            <div class="dropzone-box" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-emerald-600 mb-2"></i>
+                                <p class="text-sm font-semibold text-slate-700">Arrastra aquí los archivos o haz clic para seleccionarlos</p>
+                                <p class="hint">Formatos válidos: PDF, DOCX, XLSX, JPG, PNG · Máximo 5 archivos</p>
                             </div>
-                            <div>
-                                <label>Anexos (archivos)</label>
-                                <input type="file" name="anexos" multiple accept=".pdf,.doc,.docx,.jpg,.png,.xlsx">
-                                <p class="hint">Máx. tamaño según política institucional.</p>
-                            </div>
+                            <input type="file" id="fileInput" name="archivos" multiple accept=".pdf,.doc,.docx,.jpg,.png,.xlsx" style="display:none" onchange="handleFileSelect(this.files)">
+                            
+                            <div id="fileListContainer" class="mt-2"></div>
+                            <p id="fileLimitAlert" class="hint text-amber-600 hidden"><i class="fas fa-exclamation-triangle"></i> Límite alcanzado: Máximo 5 archivos permitidos.</p>
                         </div>
                     </div>
 
                     <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-                        <button type="submit" class="btn-primary">Radicar documento</button>
-                        <a th:href="@{/view/tramites}" class="btn-secondary">Cancelar</a>
+                        <button type="submit" id="btnRadicar" class="btn-primary">
+                            <i class="fas fa-check"></i> Radicar Documento
+                        </button>
+                        <a th:href="@{/view/radicados/documental}" class="btn-secondary">
+                            <i class="fas fa-times mr-1"></i> Cancelar
+                        </a>
                     </div>
                 </form>
             </div>
         </main>
     </div>
 </div>
+
 <script>
+// --- GESTIÓN DE REMITENTE ANÓNIMO (RF-09) ---
 function toggleAnonimo(cb) {
     const fields = document.getElementById('remitente-fields');
     const inputs = fields.querySelectorAll('input, select');
+    const remitenteNombre = document.getElementById('remitenteNombre');
+    const feedback = document.getElementById('remitenteFeedback');
+
     inputs.forEach(el => {
         if (el.name === 'formaRespuesta') {
             if (cb.checked) el.value = 'NO_APLICA';
             return;
         }
         el.disabled = cb.checked;
-        if (cb.checked) el.value = '';
+        if (cb.checked) {
+            el.value = '';
+            el.removeAttribute('required');
+        }
+    });
+
+    if (cb.checked) {
+        remitenteNombre.value = 'ANÓNIMO (Ley de Transparencia)';
+        if (feedback) feedback.textContent = 'Radicación bajo reserva de identidad según Ley de Transparencia.';
+    } else {
+        remitenteNombre.value = '';
+        remitenteNombre.setAttribute('required', 'required');
+        if (feedback) feedback.textContent = '';
+    }
+}
+
+// --- AUTOCOMPLETADO DE REMITENTE AL DIGITAR DOCUMENTO ---
+let debounceRemitente = null;
+const inputNumDoc = document.getElementById('numeroIdentificacion');
+if (inputNumDoc) {
+    inputNumDoc.addEventListener('input', function() {
+        clearTimeout(debounceRemitente);
+        const valor = this.value.trim();
+        const feedback = document.getElementById('remitenteFeedback');
+        const spinner = document.getElementById('remitenteSpinner');
+
+        if (valor.length < 3) {
+            if (feedback) feedback.textContent = '';
+            return;
+        }
+
+        debounceRemitente = setTimeout(() => {
+            if (spinner) spinner.classList.remove('hidden');
+            fetch('/api/remitentes/' + encodeURIComponent(valor))
+                .then(r => r.json())
+                .then(res => {
+                    if (spinner) spinner.classList.add('hidden');
+                    if (res.success && res.data) {
+                        const d = res.data;
+                        document.getElementById('remitenteNombre').value = d.nombre_completo || d.nombre || '';
+                        if (d.correo) document.getElementById('correoSolicitante').value = d.correo;
+                        if (d.telefono) document.getElementById('telefonoSolicitante').value = d.telefono;
+                        if (d.direccion) document.getElementById('ciudadSolicitante').value = d.direccion;
+                        if (feedback) {
+                            feedback.innerHTML = '<span class="text-emerald-600 font-semibold"><i class="fas fa-check"></i> Remitente recurrente encontrado</span>';
+                        }
+                    } else {
+                        if (feedback) feedback.textContent = 'Nuevo remitente (se registrará automáticamente).';
+                    }
+                })
+                .catch(() => {
+                    if (spinner) spinner.classList.add('hidden');
+                });
+        }, 350);
+    });
+}
+
+// --- REACTIVIDAD DE TRÁMITES (PLAZOS Y ASIGNACIÓN AUTOMÁTICA) ---
+function onTramiteChange(select) {
+    const selected = select.options[select.selectedIndex];
+    if (!selected || !selected.value) return;
+
+    const dias = parseInt(selected.getAttribute('data-dias')) || 15;
+    const prioridad = selected.getAttribute('data-prioridad');
+    const dep = selected.getAttribute('data-dependencia');
+
+    // 1. Asignar prioridad default si existe
+    if (prioridad) {
+        const selPrio = document.getElementById('selectPrioridad');
+        if (selPrio) selPrio.value = prioridad.toUpperCase().includes('ALTA') ? 'ALTA' : (prioridad.toUpperCase().includes('URG') ? 'URGENTE' : 'NORMAL');
+    }
+
+    // 2. Calcular fecha de vencimiento (hoy + días)
+    const hoy = new Date();
+    hoy.setDate(hoy.getDate() + dias);
+    const yyyy = hoy.getFullYear();
+    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dd = String(hoy.getDate()).padStart(2, '0');
+    const inputVenc = document.getElementById('fechaVencimiento');
+    if (inputVenc) inputVenc.value = `${yyyy}-${mm}-${dd}`;
+
+    // 3. Asignar dependencia responsable si está definida en el trámite
+    if (dep) {
+        const selDep = document.getElementById('selectDependencia');
+        if (selDep) {
+            selDep.value = dep;
+            onDependenciaChange(selDep);
+        }
+    }
+}
+
+// --- REACTIVIDAD DE DEPENDENCIA (BUSCA RESPONSABLE / ENCARGADO) ---
+function onDependenciaChange(select) {
+    const idDep = select.value;
+    const feedback = document.getElementById('responsableFeedback');
+    if (!idDep) return;
+
+    fetch('/api/dependencias/' + encodeURIComponent(idDep) + '/responsable')
+        .then(r => r.json())
+        .then(res => {
+            if (res.success && res.data && res.data.id_usuario) {
+                const selResp = document.getElementById('selectResponsable');
+                if (selResp) selResp.value = res.data.id_usuario;
+                if (feedback) feedback.innerHTML = `<span class="text-emerald-600 font-semibold"><i class="fas fa-user-check"></i> Encargado: ${res.data.nombre}</span>`;
+            } else {
+                if (feedback) feedback.textContent = '';
+            }
+        })
+        .catch(() => {});
+}
+
+// --- GESTIÓN DE ARCHIVOS ADJUNTOS (DRAG & DROP, MÁXIMO 5) ---
+let fileList = [];
+const MAX_FILES = 5;
+const MAX_BYTES = 15 * 1024 * 1024; // 15MB
+
+const dropzone = document.getElementById('dropzone');
+if (dropzone) {
+    ['dragenter', 'dragover'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+        });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+        });
+    });
+    dropzone.addEventListener('drop', (e) => {
+        if (e.dataTransfer && e.dataTransfer.files) {
+            handleFileSelect(e.dataTransfer.files);
+        }
+    });
+}
+
+function handleFileSelect(files) {
+    const limitAlert = document.getElementById('fileLimitAlert');
+    for (let i = 0; i < files.length; i++) {
+        if (fileList.length >= MAX_FILES) {
+            if (limitAlert) limitAlert.classList.remove('hidden');
+            break;
+        }
+        const file = files[i];
+        if (file.size > MAX_BYTES) {
+            alert(`El archivo ${file.name} excede el peso máximo permitido (15 MB).`);
+            continue;
+        }
+        fileList.push(file);
+    }
+    syncFileInput();
+    renderFileList();
+}
+
+function removeFile(index) {
+    fileList.splice(index, 1);
+    const limitAlert = document.getElementById('fileLimitAlert');
+    if (fileList.length < MAX_FILES && limitAlert) {
+        limitAlert.classList.add('hidden');
+    }
+    syncFileInput();
+    renderFileList();
+}
+
+function syncFileInput() {
+    const input = document.getElementById('fileInput');
+    const dt = new DataTransfer();
+    fileList.forEach(f => dt.items.add(f));
+    input.files = dt.files;
+}
+
+function renderFileList() {
+    const container = document.getElementById('fileListContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    fileList.forEach((file, idx) => {
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        const kb = (file.size / 1024).toFixed(1);
+        item.innerHTML = `
+            <span><i class="far fa-file-alt text-emerald-600 mr-2"></i><strong>${file.name}</strong> (${kb} KB)</span>
+            <span class="file-remove" onclick="removeFile(${idx})"><i class="fas fa-trash-alt"></i> Quitar</span>
+        `;
+        container.appendChild(item);
     });
 }
 </script>
