@@ -28,15 +28,4 @@ public class Observaciones {
 
     @Column(name = "fecha", nullable = false)
     private LocalDateTime fecha;
-    // GENERATED_EXPLICIT_ACCESSORS
-    public Long getId_observacion() { return id_observacion; }
-    public void setId_observacion(Long value) { this.id_observacion = value; }
-    public Long getId_radicado() { return id_radicado; }
-    public void setId_radicado(Long value) { this.id_radicado = value; }
-    public Long getId_usuario() { return id_usuario; }
-    public void setId_usuario(Long value) { this.id_usuario = value; }
-    public String getComentario() { return comentario; }
-    public void setComentario(String value) { this.comentario = value; }
-    public LocalDateTime getFecha() { return fecha; }
-    public void setFecha(LocalDateTime value) { this.fecha = value; }
 }

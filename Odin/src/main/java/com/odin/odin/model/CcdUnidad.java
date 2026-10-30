@@ -30,17 +30,4 @@ public class CcdUnidad
 
     @Column(name = "descripcion", columnDefinition = "text")
     private String descripcion;
-    // GENERATED_EXPLICIT_ACCESSORS
-    public Long getId_unidad() { return id_unidad; }
-    public void setId_unidad(Long value) { this.id_unidad = value; }
-    public String getCodigo_unidad() { return codigo_unidad; }
-    public void setCodigo_unidad(String value) { this.codigo_unidad = value; }
-    public String getNombre_unidad() { return nombre_unidad; }
-    public void setNombre_unidad(String value) { this.nombre_unidad = value; }
-    public String getCodigo_padre() { return codigo_padre; }
-    public void setCodigo_padre(String value) { this.codigo_padre = value; }
-    public Integer getNivel() { return nivel; }
-    public void setNivel(Integer value) { this.nivel = value; }
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String value) { this.descripcion = value; }
 }

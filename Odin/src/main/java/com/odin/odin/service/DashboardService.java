@@ -4,22 +4,16 @@ import com.odin.odin.dto.DashboardResumen;
 import com.odin.odin.repository.DocumentosRepository;
 import com.odin.odin.repository.RadicadosRepository;
 import com.odin.odin.repository.UsuariosRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class DashboardService {
 
     private final RadicadosRepository radicadosRepository;
     private final UsuariosRepository usuariosRepository;
     private final DocumentosRepository documentosRepository;
-
-    public DashboardService(RadicadosRepository radicadosRepository,
-                            UsuariosRepository usuariosRepository,
-                            DocumentosRepository documentosRepository) {
-        this.radicadosRepository = radicadosRepository;
-        this.usuariosRepository = usuariosRepository;
-        this.documentosRepository = documentosRepository;
-    }
 
     public DashboardResumen obtenerResumen() {
         DashboardResumen resumen = new DashboardResumen();

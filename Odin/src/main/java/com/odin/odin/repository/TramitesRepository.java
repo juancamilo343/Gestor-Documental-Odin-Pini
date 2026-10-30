@@ -16,5 +16,5 @@ public interface TramitesRepository extends JpaRepository<Tramites, Long> {
 
     List<Tramites> findByActivoTrueOrderByNombreAsc();
 
-    Optional<Tramites> findByIdAndActivoTrue(Long id);
+    Optional<Tramites> findByIdTramiteAndActivoTrue(Long idTramite);
 }

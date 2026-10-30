@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+// @Controller
 public class PasswordRecoveryController {
     private final PasswordRecoveryService recoveryService;
     public PasswordRecoveryController(PasswordRecoveryService recoveryService) { this.recoveryService = recoveryService; }

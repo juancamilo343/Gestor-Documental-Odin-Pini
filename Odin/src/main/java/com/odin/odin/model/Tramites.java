@@ -21,34 +21,25 @@ public class Tramites {
     private Long idTramite;
 
     @NotBlank(message = "El nombre es obligatorio")
-    @Column(
-            name = "nombre",
-            nullable = false,
-            length = 200
-    )
+    @Column(name = "nombre", nullable = false, length = 200)
     private String nombre;
 
     @NotBlank(message = "La descripción es obligatoria")
-    @Column(
-            name = "descripcion",
-            nullable = false,
-            columnDefinition = "text"
-    )
+    @Column(name = "descripcion", nullable = false, columnDefinition = "text")
     private String descripcion;
 
+    // ✅ CORREGIDO: @Column explícito
     @Column(name = "id_dependencia_responsable")
     private Long idDependenciaResponsable;
 
+    // ✅ CORREGIDO: Solo el ID, no la relación completa
     @Column(name = "id_estado_inicial")
-    private Integer idEstadoInicial;
+    private Long idEstadoInicial;
 
     @Column(name = "dias_respuesta")
     private Integer diasRespuesta;
 
-    @Column(
-            name = "prioridad_default",
-            length = 20
-    )
+    @Column(name = "prioridad_default", length = 20)
     private String prioridadDefault;
 
     @Column(name = "requiere_respuesta")
@@ -67,27 +58,22 @@ public class Tramites {
     @Column(name = "fecha_limite")
     private LocalDateTime fechaLimite;
 
+    // ✅ Relación con Dependencias (solo lectura)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "id_dependencia_responsable",
-            insertable = false,
-            updatable = false
-    )
+    @JoinColumn(name = "id_dependencia_responsable", insertable = false, updatable = false)
     private Dependencias dependenciaResponsable;
 
+    // ✅ Relación con Estados (solo lectura)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "id_estado_inicial",
-            insertable = false,
-            updatable = false
-    )
+    @JoinColumn(name = "id_estado_inicial", insertable = false, updatable = false)
     private Estados estadoInicial;
 
-    public Integer getIdEstadoInicial() {
+    // Métodos helper para mantener compatibilidad con código existente
+    public Long getIdEstadoInicial() {
         return idEstadoInicial;
     }
 
-    public void setIdEstadoInicial(Integer idEstadoInicial) {
+    public void setIdEstadoInicial(Long idEstadoInicial) {
         this.idEstadoInicial = idEstadoInicial;
     }
 
@@ -95,33 +81,7 @@ public class Tramites {
         return idDependenciaResponsable;
     }
 
-    public void setIdDependenciaResponsable(
-            Long idDependenciaResponsable) {
-
-        this.idDependenciaResponsable =
-                idDependenciaResponsable;
+    public void setIdDependenciaResponsable(Long idDependenciaResponsable) {
+        this.idDependenciaResponsable = idDependenciaResponsable;
     }
-    public Long getIdTramite() { return idTramite; }
-    public void setIdTramite(Long idTramite) { this.idTramite = idTramite; }
-    // GENERATED_EXPLICIT_ACCESSORS
-    public String getNombre() { return nombre; }
-    public void setNombre(String value) { this.nombre = value; }
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String value) { this.descripcion = value; }
-    public Integer getDiasRespuesta() { return diasRespuesta; }
-    public void setDiasRespuesta(Integer value) { this.diasRespuesta = value; }
-    public String getPrioridadDefault() { return prioridadDefault; }
-    public void setPrioridadDefault(String value) { this.prioridadDefault = value; }
-    public Boolean getRequiereRespuesta() { return requiereRespuesta; }
-    public void setRequiereRespuesta(Boolean value) { this.requiereRespuesta = value; }
-    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
-    public void setFechaCreacion(LocalDateTime value) { this.fechaCreacion = value; }
-    public LocalDateTime getFechaActualizacion() { return fechaActualizacion; }
-    public void setFechaActualizacion(LocalDateTime value) { this.fechaActualizacion = value; }
-    public LocalDateTime getFechaLimite() { return fechaLimite; }
-    public void setFechaLimite(LocalDateTime value) { this.fechaLimite = value; }
-    public Dependencias getDependenciaResponsable() { return dependenciaResponsable; }
-    public void setDependenciaResponsable(Dependencias value) { this.dependenciaResponsable = value; }
-    public Estados getEstadoInicial() { return estadoInicial; }
-    public void setEstadoInicial(Estados value) { this.estadoInicial = value; }
 }

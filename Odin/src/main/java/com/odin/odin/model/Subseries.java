@@ -55,19 +55,4 @@ public class Subseries
 
     @Column(name = "observaciones_retencion", columnDefinition = "text")
     private String observaciones_retencion;
-    public Long getId_subserie() { return id_subserie; }
-    public void setId_subserie(Long id_subserie) { this.id_subserie = id_subserie; }
-    // GENERATED_EXPLICIT_ACCESSORS
-    public Long getId_serie() { return id_serie; }
-    public void setId_serie(Long value) { this.id_serie = value; }
-    public Series getSerie() { return serie; }
-    public void setSerie(Series value) { this.serie = value; }
-    public String getCodigo_subserie() { return codigo_subserie; }
-    public void setCodigo_subserie(String value) { this.codigo_subserie = value; }
-    public String getNombre_subserie() { return nombre_subserie; }
-    public void setNombre_subserie(String value) { this.nombre_subserie = value; }
-    public String getTipo_pqrsf() { return tipo_pqrsf; }
-    public void setTipo_pqrsf(String value) { this.tipo_pqrsf = value; }
-    public String getObservaciones_retencion() { return observaciones_retencion; }
-    public void setObservaciones_retencion(String value) { this.observaciones_retencion = value; }
 }

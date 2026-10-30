@@ -45,23 +45,4 @@ public class RemitentesExternos {
 
     @Column(name = "fecha_registro")
     private String fecha_registro;
-    // GENERATED_EXPLICIT_ACCESSORS
-    public Long getId_remitente() { return id_remitente; }
-    public void setId_remitente(Long value) { this.id_remitente = value; }
-    public String getNombre() { return nombre; }
-    public void setNombre(String value) { this.nombre = value; }
-    public String getApellido() { return apellido; }
-    public void setApellido(String value) { this.apellido = value; }
-    public String getTipo_identificacion() { return tipo_identificacion; }
-    public void setTipo_identificacion(String value) { this.tipo_identificacion = value; }
-    public String getNum_identificacion() { return num_identificacion; }
-    public void setNum_identificacion(String value) { this.num_identificacion = value; }
-    public String getCorreo() { return correo; }
-    public void setCorreo(String value) { this.correo = value; }
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String value) { this.telefono = value; }
-    public String getDireccion() { return direccion; }
-    public void setDireccion(String value) { this.direccion = value; }
-    public String getFecha_registro() { return fecha_registro; }
-    public void setFecha_registro(String value) { this.fecha_registro = value; }
 }

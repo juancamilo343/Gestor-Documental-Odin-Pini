@@ -31,17 +31,4 @@ public class HistorialRadicado {
 
     @Column(name = "fecha", nullable = false)
     private LocalDateTime fecha;
-    // GENERATED_EXPLICIT_ACCESSORS
-    public Long getId_historial() { return id_historial; }
-    public void setId_historial(Long value) { this.id_historial = value; }
-    public Long getId_radicado() { return id_radicado; }
-    public void setId_radicado(Long value) { this.id_radicado = value; }
-    public Long getId_usuario() { return id_usuario; }
-    public void setId_usuario(Long value) { this.id_usuario = value; }
-    public String getAccion() { return accion; }
-    public void setAccion(String value) { this.accion = value; }
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String value) { this.descripcion = value; }
-    public LocalDateTime getFecha() { return fecha; }
-    public void setFecha(LocalDateTime value) { this.fecha = value; }
 }

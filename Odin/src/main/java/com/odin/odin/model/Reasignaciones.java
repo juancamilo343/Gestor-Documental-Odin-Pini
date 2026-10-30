@@ -52,16 +52,4 @@ public class Reasignaciones {
             fecha = LocalDateTime.now();
         }
     }
-    public Long getId_reasignacion() { return id_reasignacion; }
-    public void setId_reasignacion(Long value) { this.id_reasignacion = value; }
-    public Integer getId_radicado() { return id_radicado; }
-    public void setId_radicado(Integer value) { this.id_radicado = value; }
-    public Long getId_usuario_anterior() { return id_usuario_anterior; }
-    public void setId_usuario_anterior(Long value) { this.id_usuario_anterior = value; }
-    public Long getId_usuario_nuevo() { return id_usuario_nuevo; }
-    public void setId_usuario_nuevo(Long value) { this.id_usuario_nuevo = value; }
-    public Long getId_dependencia_nueva() { return id_dependencia_nueva; }
-    public void setId_dependencia_nueva(Long value) { this.id_dependencia_nueva = value; }
-    public java.time.LocalDateTime getFecha() { return fecha; }
-    public void setFecha(java.time.LocalDateTime value) { this.fecha = value; }
 }

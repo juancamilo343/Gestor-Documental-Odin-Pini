@@ -42,17 +42,5 @@ public class Plantilla
 
 
 
-    // GENERATED_EXPLICIT_ACCESSORS
-    public long getId_evento() { return id_evento; }
-    public void setId_evento(long value) { this.id_evento = value; }
-    public long getId_radicado() { return id_radicado; }
-    public void setId_radicado(long value) { this.id_radicado = value; }
-    public long getId_usuario() { return id_usuario; }
-    public void setId_usuario(long value) { this.id_usuario = value; }
-    public String getAccion() { return accion; }
-    public void setAccion(String value) { this.accion = value; }
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String value) { this.descripcion = value; }
-    public String getFecha() { return fecha; }
-    public void setFecha(String value) { this.fecha = value; }
 }
+

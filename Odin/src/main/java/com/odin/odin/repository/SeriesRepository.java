@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface SeriesRepository extends JpaRepository<Series, Long> {
 
-    Optional<Series> findByCodigoSerie(String codigoSerie);
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM Series s WHERE s.codigo_serie = :codigoSerie")
+    Optional<Series> findByCodigoSerie(@org.springframework.data.repository.query.Param("codigoSerie") String codigoSerie);
 }
