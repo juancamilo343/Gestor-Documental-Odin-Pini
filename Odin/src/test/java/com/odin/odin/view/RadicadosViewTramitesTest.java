@@ -1,95 +1,132 @@
 package com.odin.odin.view;
 
+import com.odin.odin.model.Radicados;
 import com.odin.odin.model.Tramites;
-import com.odin.odin.repository.TramitesRepository;
-import org.junit.jupiter.api.BeforeEach;
+import com.odin.odin.repository.*;
+import com.odin.odin.service.ConsecutivoRadicadoService;
+import com.odin.odin.service.DocumentosService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.ui.ConcurrentModel;
+import org.springframework.ui.Model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RadicadosViewTramitesTest {
 
-    @Mock
-    private TramitesRepository tramitesRepository;
+    @Mock private RadicadosRepository radicadosRepository;
+    @Mock private DependenciasRepository dependenciasRepository;
+    @Mock private SeriesRepository seriesRepository;
+    @Mock private SubseriesRepository subseriesRepository;
+    @Mock private TramitesRepository tramitesRepository;
+    @Mock private EstadosRepository estadosRepository;
+    @Mock private UsuariosRepository usuariosRepository;
+    @Mock private DocumentosRepository documentosRepository;
+    @Mock private DocumentosService documentosService;
+    @Mock private ConsecutivoRadicadoService consecutivoService;
+    @Mock private RemitentesExternosRepository remitentesRepository;
+    @Mock private JdbcTemplate jdbcTemplate;
 
     @InjectMocks
     private RadicadosView radicadosView;
 
     @Test
-    @DisplayName("Debe separar la opción agrupada PQRS en cuatro trámites individuales con 15 días hábiles")
-    void obtenerTramitesSeparados_DesagregaPQRS() {
-        // Simular catálogo que solo tiene el trámite agrupado 'PQRS'
-        List<Tramites> mockCatalog = new ArrayList<>();
-        mockCatalog.add(Tramites.builder()
-                .idTramite(1L)
-                .nombre("PQRS")
-                .descripcion("Peticiones Quejas Reclamos Sugerencias")
+    @DisplayName("cargarCatalogos debe consultar findByActivoTrueOrderByNombreAsc directamente de la base de datos")
+    void cargarCatalogos_ConsultaDirectaBD() {
+        when(dependenciasRepository.findAll()).thenReturn(Collections.emptyList());
+        when(seriesRepository.findAll()).thenReturn(Collections.emptyList());
+        when(subseriesRepository.findAll()).thenReturn(Collections.emptyList());
+        when(estadosRepository.findAll()).thenReturn(Collections.emptyList());
+        when(usuariosRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<Tramites> catalogoActivo = new ArrayList<>();
+        catalogoActivo.add(Tramites.builder().idTramite(5L).nombre("Petición").diasRespuesta(15).activo(true).build());
+        catalogoActivo.add(Tramites.builder().idTramite(24L).nombre("Queja").diasRespuesta(15).activo(true).build());
+        catalogoActivo.add(Tramites.builder().idTramite(25L).nombre("Reclamo").diasRespuesta(15).activo(true).build());
+        catalogoActivo.add(Tramites.builder().idTramite(26L).nombre("Sugerencia").diasRespuesta(15).activo(true).build());
+
+        when(tramitesRepository.findByActivoTrueOrderByNombreAsc()).thenReturn(catalogoActivo);
+
+        Model model = new ConcurrentModel();
+        ReflectionTestUtils.invokeMethod(radicadosView, "cargarCatalogos", model);
+
+        @SuppressWarnings("unchecked")
+        List<Tramites> tramitesEnModelo = (List<Tramites>) model.getAttribute("tramites");
+        assertNotNull(tramitesEnModelo);
+        assertEquals(4, tramitesEnModelo.size());
+
+        // Verificar que ningún trámite sea 'PQRS' agrupado
+        boolean contienePqrs = tramitesEnModelo.stream().anyMatch(t -> "PQRS".equalsIgnoreCase(t.getNombre().trim()));
+        assertFalse(contienePqrs, "El trámite agrupado PQRS no debe estar presente");
+
+        // Verificar los 4 trámites reales
+        assertTrue(tramitesEnModelo.stream().anyMatch(t -> t.getIdTramite() == 5L && t.getNombre().equals("Petición")));
+        assertTrue(tramitesEnModelo.stream().anyMatch(t -> t.getIdTramite() == 24L && t.getNombre().equals("Queja")));
+        assertTrue(tramitesEnModelo.stream().anyMatch(t -> t.getIdTramite() == 25L && t.getNombre().equals("Reclamo")));
+        assertTrue(tramitesEnModelo.stream().anyMatch(t -> t.getIdTramite() == 26L && t.getNombre().equals("Sugerencia")));
+    }
+
+    @Test
+    @DisplayName("prepararRadicado debe preservar el ID real del trámite y calcular fecha límite en días hábiles")
+    void prepararRadicado_PreservaIdRealYCalculaDiasHabiles() {
+        when(consecutivoService.siguienteNumeroRadicado(any())).thenReturn("RAD-2026-00001");
+
+        Tramites queja = Tramites.builder()
+                .idTramite(24L)
+                .nombre("Queja")
                 .diasRespuesta(15)
                 .prioridadDefault("MEDIA")
                 .idDependenciaResponsable(2L)
                 .activo(true)
-                .build());
-        mockCatalog.add(Tramites.builder()
-                .idTramite(2L)
-                .nombre("OFICIO")
-                .descripcion("Comunicación oficial")
-                .diasRespuesta(15)
-                .prioridadDefault("MEDIA")
-                .idDependenciaResponsable(1L)
-                .activo(true)
-                .build());
+                .build();
 
-        when(tramitesRepository.findByActivoTrueOrderByNombreAsc()).thenReturn(mockCatalog);
+        when(tramitesRepository.findById(24L)).thenReturn(Optional.of(queja));
 
-        @SuppressWarnings("unchecked")
-        List<Tramites> resultado = (List<Tramites>) ReflectionTestUtils.invokeMethod(radicadosView, "obtenerTramitesSeparados");
+        Radicados r = new Radicados();
+        r.setId_tramite(24L);
+        r.setFecha_radicado("2026-10-30"); // Viernes
+        r.setAsunto("Inconformidad con la atención recibida");
 
-        assertNotNull(resultado);
+        ReflectionTestUtils.invokeMethod(radicadosView, "prepararRadicado", r, "/view/radicados/save");
 
-        // 1. Verificar que 'PQRS' agrupado no aparezca
-        boolean tienePqrsAgrupado = resultado.stream()
-                .anyMatch(t -> "PQRS".equalsIgnoreCase(t.getNombre().trim()));
-        assertFalse(tienePqrsAgrupado, "No debe incluirse la opción agrupada PQRS");
+        // Verificar que el ID real de la BD se mantiene id_tramite = 24 (sin mutar a 1 ni inventar IDs)
+        assertEquals(24L, r.getId_tramite());
 
-        // 2. Verificar que aparezcan los cuatro trámites independientes
-        Tramites peticion = resultado.stream()
-                .filter(t -> t.getNombre().toLowerCase().contains("petición") || t.getNombre().toLowerCase().contains("peticion"))
-                .findFirst().orElse(null);
-        Tramites queja = resultado.stream()
-                .filter(t -> t.getNombre().equalsIgnoreCase("Queja"))
-                .findFirst().orElse(null);
-        Tramites reclamo = resultado.stream()
-                .filter(t -> t.getNombre().equalsIgnoreCase("Reclamo"))
-                .findFirst().orElse(null);
-        Tramites sugerencia = resultado.stream()
-                .filter(t -> t.getNombre().equalsIgnoreCase("Sugerencia"))
-                .findFirst().orElse(null);
+        // Verificar que el asunto no fue alterado con prefijos artificiales
+        assertEquals("Inconformidad con la atención recibida", r.getAsunto());
 
-        assertNotNull(peticion, "Debe existir Petición");
-        assertNotNull(queja, "Debe existir Queja");
-        assertNotNull(reclamo, "Debe existir Reclamo");
-        assertNotNull(sugerencia, "Debe existir Sugerencia");
+        // Verificar cálculo en días hábiles: 2026-10-30 + 15 días hábiles = 2026-11-20
+        assertEquals("2026-11-20", r.getFecha_vencimiento());
+        assertEquals("2026-11-20", r.getFecha_limite());
+    }
 
-        // 3. Verificar que cada uno tenga 15 días hábiles
-        assertEquals(15, peticion.getDiasRespuesta());
-        assertEquals(15, queja.getDiasRespuesta());
-        assertEquals(15, reclamo.getDiasRespuesta());
-        assertEquals(15, sugerencia.getDiasRespuesta());
+    @Test
+    @DisplayName("prepararRadicado respeta fecha límite ya calculada desde la interfaz si está presente")
+    void prepararRadicado_RespetaFechaLimiteFront() {
+        when(consecutivoService.siguienteNumeroRadicado(any())).thenReturn("RAD-2026-00002");
 
-        // 4. Verificar que los demás trámites sigan intactos
-        boolean tieneOficio = resultado.stream()
-                .anyMatch(t -> "OFICIO".equalsIgnoreCase(t.getNombre()));
-        assertTrue(tieneOficio, "Los demás trámites deben permanecer intactos");
+        Radicados r = new Radicados();
+        r.setId_tramite(25L); // Reclamo
+        r.setFecha_radicado("2026-10-30");
+        r.setFecha_vencimiento("2026-11-20");
+
+        ReflectionTestUtils.invokeMethod(radicadosView, "prepararRadicado", r, "/view/radicados/save");
+
+        assertEquals(25L, r.getId_tramite());
+        assertEquals("2026-11-20", r.getFecha_vencimiento());
+        assertEquals("2026-11-20", r.getFecha_limite());
     }
 }

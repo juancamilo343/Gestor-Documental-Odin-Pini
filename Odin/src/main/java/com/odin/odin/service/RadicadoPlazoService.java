@@ -41,9 +41,7 @@ public class RadicadoPlazoService {
                 }
             } catch (Exception ignored) {}
 
-            // Cálculo en días hábiles (excluyendo sábados y domingos, sin contar el día de radicación)
-            LocalDate fechaVencimiento = PlazoUtil.calcularFechaLimiteHabiles(base, t.getDiasRespuesta());
-            r.setFecha_vencimiento(fechaVencimiento.format(F));
+            r.setFecha_vencimiento(base.plusDays(t.getDiasRespuesta()).format(F));
         }
 
         if (r.getId_usuario() != null && r.getFecha_vencimiento() != null && !r.getFecha_vencimiento().isBlank()) {
@@ -54,13 +52,13 @@ public class RadicadoPlazoService {
     private void crearAlerta(Radicados r) {
         try {
             LocalDate venc = LocalDate.parse(r.getFecha_vencimiento().substring(0, 10));
-            int diasHabiles = PlazoUtil.contarDiasHabilesRestantes(LocalDate.now(), venc);
-            if (diasHabiles <= 3 && diasHabiles >= 0) {
+            long dias = LocalDate.now().until(venc).getDays();
+            if (dias <= 3 && dias >= 0) {
                 Notificaciones n = new Notificaciones();
                 n.setId_usuario(r.getId_usuario());
                 n.setId_radicado(r.getId_radicado());
-                n.setTitulo(diasHabiles == 0 ? "Radicado vence hoy" : "Radicado próximo a vencer");
-                n.setMensaje("El radicado " + r.getNumero_radicado() + " tiene vencimiento " + venc + " (" + diasHabiles + " día(s) hábil(es) restante(s)).");
+                n.setTitulo(dias == 0 ? "Radicado vence hoy" : "Radicado próximo a vencer");
+                n.setMensaje("El radicado " + r.getNumero_radicado() + " tiene vencimiento " + venc + " (" + dias + " día(s)).");
                 n.setLeida(false);
                 n.setFecha(LocalDateTime.now());
                 notificaciones.save(n);

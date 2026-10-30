@@ -6,16 +6,15 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Utilidad transversal para el cálculo de vencimientos, fechas límite y días restantes en DÍAS HÁBILES.
- * - Excluye sábados y domingos de acuerdo con los estándares legales de PQRS y gestión documental.
- * - No cuenta el día de radicación como primer día de respuesta (inicia el conteo al día hábil siguiente).
- * - Si no hay fecha_vencimiento/fecha_limite, calcula a partir de fecha_radicado + días hábiles del trámite.
- * - Si el radicado está cerrado o en estado terminal, no muestra días.
+ * Utilidad transversal para el cálculo de vencimientos, fechas límite y días restantes.
+ * Proporciona métodos específicos para conteo en días calendario (por defecto institucional para consultas
+ * y gestión de trámites) y métodos dedicados para cálculo en días hábiles (utilizados en radicación documental).
  */
 public final class PlazoUtil {
 
@@ -114,7 +113,8 @@ public final class PlazoUtil {
             r.setFecha_vencimiento(venc.format(ISO));
         }
 
-        r.setDiasRestantes(contarDiasHabilesRestantes(LocalDate.now(), venc));
+        // Días calendario por defecto para compatibilidad institucional (Gestión de Trámites, Consulta, etc.)
+        r.setDiasRestantes((int) ChronoUnit.DAYS.between(LocalDate.now(), venc));
     }
 
     public static void aplicar(Collection<Radicados> lista) {
@@ -144,7 +144,7 @@ public final class PlazoUtil {
         LocalDate base = parseFecha(r.getFecha_radicado());
         if (base == null) base = LocalDate.now();
 
-        return calcularFechaLimiteHabiles(base, diasRespuestaTramite);
+        return base.plusDays(diasRespuestaTramite);
     }
 
     private static LocalDate parseFecha(String texto) {

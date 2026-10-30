@@ -53,14 +53,15 @@ class PlazoUtilTest {
     }
 
     @Test
-    @DisplayName("Aplicar reglas a radicado con trámite calcula fecha y días hábiles")
-    void aplicar_RadicadoConDiasTramite() {
+    @DisplayName("PlazoUtil.aplicar preserva cálculo en días calendario para otros módulos (Gestión de Trámites y Consulta)")
+    void aplicar_RadicadoConDiasCalendarioParaModulosCompartidos() {
         Radicados r = new Radicados();
         r.setFecha_radicado("2026-10-30");
 
         PlazoUtil.aplicar(r, 15);
 
         assertNotNull(r.getFecha_vencimiento());
-        assertEquals("2026-11-20", r.getFecha_vencimiento());
+        // 15 días calendario a partir del 2026-10-30 = 2026-11-14
+        assertEquals("2026-11-14", r.getFecha_vencimiento());
     }
 }
