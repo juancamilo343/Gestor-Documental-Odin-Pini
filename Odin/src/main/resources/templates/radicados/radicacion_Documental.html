@@ -581,6 +581,23 @@ function onTipoDocumentoChange(select) {
     actualizarPrioridadAutomatica();
 }
 
+// --- CÁLCULO ESTRICTO DE PLAZOS EN DÍAS HÁBILES (EXCLUYE SÁBADOS Y DOMINGOS) ---
+function calcularFechaLimiteHabiles(fechaBase, diasHabiles) {
+    if (!fechaBase) fechaBase = new Date();
+    const fecha = new Date(fechaBase);
+    fecha.setHours(0, 0, 0, 0);
+    let agregados = 0;
+    // No contar el día de radicación como primer día de respuesta: comenzar al día siguiente
+    while (agregados < diasHabiles) {
+        fecha.setDate(fecha.getDate() + 1);
+        const diaSemana = fecha.getDay(); // 0 = Domingo, 6 = Sábado
+        if (diaSemana !== 0 && diaSemana !== 6) {
+            agregados++;
+        }
+    }
+    return fecha;
+}
+
 // --- REACTIVIDAD DE TRÁMITES (PLAZOS Y ASIGNACIÓN AUTOMÁTICA) ---
 function onTramiteChange(select) {
     const selected = select.options[select.selectedIndex];
@@ -603,18 +620,15 @@ function onTramiteChange(select) {
     const dias = (diasAttr !== null && diasAttr !== '') ? parseInt(diasAttr) : 15;
     const dep = selected.getAttribute('data-dependencia');
 
-    // 2. Calcular fecha límite / vencimiento (hoy + días calendario según lógica existente)
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-    const fechaLimite = new Date(hoy);
-    fechaLimite.setDate(fechaLimite.getDate() + dias);
+    // 2. Calcular fecha límite / vencimiento en DÍAS HÁBILES (excluyendo sábados y domingos)
+    const fechaLimite = calcularFechaLimiteHabiles(new Date(), dias);
 
     const yyyy = fechaLimite.getFullYear();
     const mm = String(fechaLimite.getMonth() + 1).padStart(2, '0');
     const dd = String(fechaLimite.getDate()).padStart(2, '0');
     if (inputVenc) inputVenc.value = `${yyyy}-${mm}-${dd}`;
 
-    // 3. Actualizar indicador visual de días restantes
+    // 3. Actualizar indicador visual de días hábiles restantes
     actualizarIndicadorDias(dias);
 
     // 4. Asignar dependencia responsable si está configurada en el trámite
@@ -627,35 +641,33 @@ function onTramiteChange(select) {
     }
 }
 
-// Función para formatear e ilustrar el estado del plazo
+// Función para formatear e ilustrar el estado del plazo en DÍAS HÁBILES
 function actualizarIndicadorDias(dias) {
     const badge = document.getElementById('badgeDiasRestantes');
     if (!badge) return;
 
-    badge.className = 'text-xs px-2 py-0.5 rounded-full font-semibold inline-flex items-center gap-1';
+    badge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1.5';
 
     if (dias > 3) {
         // Plazo normal disponible
-        badge.classList.add('bg-emerald-100', 'text-emerald-800');
-        badge.innerHTML = `<i class="fas fa-clock mr-1"></i>Faltan ${dias} días para responder`;
+        badge.classList.add('bg-emerald-100', 'text-emerald-800', 'dark:bg-emerald-900/40', 'dark:text-emerald-300');
+        badge.innerHTML = `<i class="fas fa-calendar-check mr-1"></i>Plazo: ${dias} días hábiles para responder`;
     } else if (dias > 1 && dias <= 3) {
-        // Plazo próximo a vencer (2 a 3 días)
-        badge.classList.add('bg-amber-100', 'text-amber-800');
-        badge.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i>Faltan ${dias} días para responder`;
+        // Plazo próximo a vencer (2 a 3 días hábiles)
+        badge.classList.add('bg-amber-100', 'text-amber-800', 'dark:bg-amber-900/40', 'dark:text-amber-300');
+        badge.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i>Atención: ${dias} días hábiles para responder`;
     } else if (dias === 1) {
-        // Falta 1 día (singular)
-        badge.classList.add('bg-orange-100', 'text-orange-800');
-        badge.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i>Falta 1 día para responder`;
+        // Falta 1 día hábil (singular)
+        badge.classList.add('bg-orange-100', 'text-orange-800', 'dark:bg-orange-900/40', 'dark:text-orange-300');
+        badge.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i>Falta 1 día hábil para responder`;
     } else if (dias === 0) {
         // Vence hoy
-        badge.classList.add('bg-orange-200', 'text-orange-900', 'font-bold');
-        badge.innerHTML = `<i class="fas fa-bolt mr-1"></i>El plazo vence hoy`;
+        badge.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900/40', 'dark:text-red-300');
+        badge.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i>Vence hoy`;
     } else {
-        // Plazo vencido (dias < 0)
-        const vencidos = Math.abs(dias);
-        badge.classList.add('bg-red-100', 'text-red-800', 'font-bold');
-        const plural = vencidos === 1 ? 'día' : 'días';
-        badge.innerHTML = `<i class="fas fa-times-circle mr-1"></i>Plazo vencido hace ${vencidos} ${plural}`;
+        // Vencido
+        badge.classList.add('bg-red-200', 'text-red-900', 'dark:bg-red-950', 'dark:text-red-200');
+        badge.innerHTML = `<i class="fas fa-skull-crossbones mr-1"></i>Vencido hace ${Math.abs(dias)} día(s) hábil(es)`;
     }
 }
 

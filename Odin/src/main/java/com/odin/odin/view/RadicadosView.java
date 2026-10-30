@@ -126,7 +126,7 @@ public class RadicadosView {
 
         model.addAttribute(
                 "tramites",
-                tramitesRepository.findAll()
+                obtenerTramitesSeparados()
         );
 
         model.addAttribute(
@@ -387,12 +387,21 @@ public class RadicadosView {
                 );
 
         /*
-         * TRÁMITE
+         * TRÁMITE Y SEPARACIÓN PQRS
          */
-        if (!tieneNumero(
-                radicado.getId_tramite()
-        )) {
-
+        if (tieneNumero(radicado.getId_tramite())) {
+            Long idTr = radicado.getId_tramite();
+            if (idTr == 101L || idTr == 102L || idTr == 103L) {
+                if (!tramitesRepository.existsById(idTr)) {
+                    radicado.setId_tramite(1L);
+                    String sub = idTr == 101L ? "Queja" : (idTr == 102L ? "Reclamo" : "Sugerencia");
+                    radicado.setTipoPQRS(sub);
+                    if (tieneTexto(radicado.getAsunto()) && !radicado.getAsunto().toLowerCase().contains(sub.toLowerCase())) {
+                        radicado.setAsunto("[" + sub.toUpperCase() + "] " + radicado.getAsunto());
+                    }
+                }
+            }
+        } else {
             radicado.setId_tramite(
                     primerId(
                             tipoPQRSId,
@@ -401,6 +410,20 @@ public class RadicadosView {
                             1
                     )
             );
+        }
+
+        /*
+         * CÁLCULO SEGURO DE FECHA LÍMITE EN DÍAS HÁBILES (excluyendo fines de semana)
+         */
+        if (!tieneTexto(radicado.getFecha_vencimiento()) && tieneNumero(radicado.getId_tramite())) {
+            Integer dias = 15;
+            com.odin.odin.model.Tramites trObj = tramitesRepository.findById(radicado.getId_tramite()).orElse(null);
+            if (trObj != null && trObj.getDiasRespuesta() != null && trObj.getDiasRespuesta() > 0) {
+                dias = trObj.getDiasRespuesta();
+            }
+            java.time.LocalDate fechaBase = java.time.LocalDateTime.now().toLocalDate();
+            java.time.LocalDate fLim = com.odin.odin.util.PlazoUtil.calcularFechaLimiteHabiles(fechaBase, dias);
+            radicado.setFecha_vencimiento(fLim.toString());
         }
 
         /*
@@ -712,5 +735,105 @@ public class RadicadosView {
     private Long idValorODefecto(Number valor, Number idPorDefecto) {
         if (valor != null && valor.longValue() > 0) return valor.longValue();
         return idPorDefecto == null ? null : idPorDefecto.longValue();
+    }
+
+    /**
+     * Retorna el catálogo de trámites garantizando que las opciones PQRS no se presenten
+     * agrupadas, sino separadas individualmente en: Petición, Queja, Reclamo y Sugerencia,
+     * cada una con 15 días hábiles de respuesta.
+     */
+    private List<com.odin.odin.model.Tramites> obtenerTramitesSeparados() {
+        List<com.odin.odin.model.Tramites> lista = tramitesRepository.findByActivoTrueOrderByNombreAsc();
+        if (lista == null || lista.isEmpty()) {
+            lista = tramitesRepository.findAll();
+        }
+
+        boolean tienePeticion = false;
+        boolean tieneQueja = false;
+        boolean tieneReclamo = false;
+        boolean tieneSugerencia = false;
+        com.odin.odin.model.Tramites tramitePqrs = null;
+
+        for (com.odin.odin.model.Tramites t : lista) {
+            String n = normalizarNombreTramite(t.getNombre());
+            if ("pqrs".equals(n)) {
+                tramitePqrs = t;
+            } else if ("peticion".equals(n) || n.contains("derecho de peticion")) {
+                tienePeticion = true;
+            } else if ("queja".equals(n)) {
+                tieneQueja = true;
+            } else if ("reclamo".equals(n)) {
+                tieneReclamo = true;
+            } else if ("sugerencia".equals(n)) {
+                tieneSugerencia = true;
+            }
+        }
+
+        List<com.odin.odin.model.Tramites> resultado = new ArrayList<>();
+        Long depRespDefault = (tramitePqrs != null && tramitePqrs.getIdDependenciaResponsable() != null)
+                ? tramitePqrs.getIdDependenciaResponsable() : 2L;
+
+        // Añadir trámites que no sean el agrupado "PQRS"
+        for (com.odin.odin.model.Tramites t : lista) {
+            String n = normalizarNombreTramite(t.getNombre());
+            if ("pqrs".equals(n)) {
+                continue; // Excluir 'PQRS' agrupado de la lista desplegable
+            }
+            resultado.add(t);
+        }
+
+        // Si en la base de datos aún no se han creado individualmente, agregarlos con 15 días hábiles:
+        if (!tienePeticion) {
+            resultado.add(0, com.odin.odin.model.Tramites.builder()
+                    .idTramite(tramitePqrs != null ? tramitePqrs.getIdTramite() : 1L)
+                    .nombre("Petición")
+                    .descripcion("Petición general o solicitud ciudadana (15 días hábiles)")
+                    .diasRespuesta(15)
+                    .prioridadDefault("MEDIA")
+                    .idDependenciaResponsable(depRespDefault)
+                    .activo(true)
+                    .build());
+        }
+        if (!tieneQueja) {
+            resultado.add(1, com.odin.odin.model.Tramites.builder()
+                    .idTramite(101L)
+                    .nombre("Queja")
+                    .descripcion("Manifestación de protesta o descontento por la conducta de un servidor (15 días hábiles)")
+                    .diasRespuesta(15)
+                    .prioridadDefault("MEDIA")
+                    .idDependenciaResponsable(depRespDefault)
+                    .activo(true)
+                    .build());
+        }
+        if (!tieneReclamo) {
+            resultado.add(2, com.odin.odin.model.Tramites.builder()
+                    .idTramite(102L)
+                    .nombre("Reclamo")
+                    .descripcion("Manifestación de insatisfacción sobre la prestación indebida de un servicio (15 días hábiles)")
+                    .diasRespuesta(15)
+                    .prioridadDefault("MEDIA")
+                    .idDependenciaResponsable(depRespDefault)
+                    .activo(true)
+                    .build());
+        }
+        if (!tieneSugerencia) {
+            resultado.add(3, com.odin.odin.model.Tramites.builder()
+                    .idTramite(103L)
+                    .nombre("Sugerencia")
+                    .descripcion("Proposición o recomendación para mejorar los servicios institucionales (15 días hábiles)")
+                    .diasRespuesta(15)
+                    .prioridadDefault("MEDIA")
+                    .idDependenciaResponsable(depRespDefault)
+                    .activo(true)
+                    .build());
+        }
+
+        return resultado;
+    }
+
+    private String normalizarNombreTramite(String s) {
+        if (s == null) return "";
+        return java.text.Normalizer.normalize(s.trim().toLowerCase(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     }
 }
