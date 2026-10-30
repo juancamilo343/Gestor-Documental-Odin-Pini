@@ -1,12 +1,19 @@
 # IntelliJ
 .idea/
 *.iml
+*.ipr
+*.iws
 
 # Maven
 target/
+Odin/target/
 
 # Logs
 *.log
+
+# Uploads y archivos temporales de prueba
+uploads/
+Odin/uploads/
 
 # Application properties sensibles
 src/main/resources/application.properties

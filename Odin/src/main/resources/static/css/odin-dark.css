@@ -8,30 +8,99 @@ html.dark body.text-slate-800 {
   color: #e2e8f0 !important;
 }
 
+/* ===== CONTENEDORES, TARJETAS Y FONDOS PRINCIPALES ===== */
 html.dark .bg-white,
 html.dark .card,
+html.dark .form-card,
+html.dark .rep-card,
+html.dark .login-card,
 html.dark .table-card,
 html.dark .filter-card,
 html.dark .table-wrap,
 html.dark .rounded-xl.border,
 html.dark .odin-page-header,
-html.dark header.odin-page-header > div {
+html.dark header.odin-page-header > div,
+html.dark .odin-modal-card {
   background: #1e293b !important;
   border-color: #334155 !important;
   color: #e2e8f0 !important;
 }
 
-html.dark .odin-page-title,
-html.dark h1, html.dark h2, html.dark h3,
-html.dark .text-slate-800, html.dark .text-slate-900 {
-  color: #f8fafc !important;
+/* Superficies secundarias y recuadros internos */
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/70,
+html.dark .bg-slate-100,
+html.dark .bg-\[\#f8fafc\] {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
 }
-html.dark .odin-page-subtitle,
-html.dark .text-slate-500, html.dark .text-slate-600,
-html.dark .kpi small, html.dark label, html.dark th {
+
+/* ===== ELEMENTOS ESPECÍFICOS DE FORMULARIOS Y RADICACIÓN ===== */
+html.dark .anon-box {
+  background: rgba(6, 78, 59, 0.25) !important;
+  border-color: #047857 !important;
+  color: #86efac !important;
+}
+html.dark .anon-box span,
+html.dark .anon-box label {
+  color: #86efac !important;
+}
+
+html.dark .dropzone-box {
+  background: #0f172a !important;
+  border-color: #475569 !important;
+  color: #cbd5e1 !important;
+}
+html.dark .dropzone-box:hover,
+html.dark .dropzone-box.dragover {
+  border-color: #22c55e !important;
+  background: rgba(6, 78, 59, 0.2) !important;
+}
+
+html.dark .file-item {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+  color: #e2e8f0 !important;
+}
+html.dark .file-item strong {
+  color: #f1f5f9 !important;
+}
+
+html.dark .section-title {
+  color: #f8fafc !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+html.dark .hint {
   color: #94a3b8 !important;
 }
 
+/* ===== TIPOGRAFÍA Y TÍTULOS (CONTRASTE ALTO) ===== */
+html.dark .odin-page-title,
+html.dark h1, html.dark h2, html.dark h3, html.dark h4,
+html.dark .text-slate-800,
+html.dark .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+html.dark .odin-page-subtitle,
+html.dark .text-slate-500,
+html.dark .text-slate-600,
+html.dark .text-slate-400,
+html.dark .kpi small,
+html.dark label,
+html.dark th {
+  color: #94a3b8 !important;
+}
+
+html.dark .card span,
+html.dark .form-grid label,
+html.dark .form-card label {
+  color: #94a3b8 !important;
+}
+
+/* ===== KPIS Y MÉTRICAS ===== */
 html.dark .kpi, html.dark a.kpi {
   background: #1e293b !important;
   border: 1px solid #334155 !important;
@@ -42,20 +111,95 @@ html.dark .kpi.blue { border-left: 4px solid #3b82f6 !important; }
 html.dark .kpi.green { border-left: 4px solid #22c55e !important; }
 html.dark .kpi.red { border-left: 4px solid #ef4444 !important; }
 
+/* ===== TABLAS ===== */
 html.dark table thead, html.dark table thead th {
   background: #0f172a !important;
   color: #94a3b8 !important;
+  border-color: #334155 !important;
 }
-html.dark table tbody td { color: #e2e8f0 !important; border-color: #334155 !important; }
-html.dark table tbody tr:hover { background: #334155 !important; }
+html.dark table tbody td {
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+html.dark table tbody tr:hover {
+  background: #334155 !important;
+}
+html.dark .border-b {
+  border-color: #334155 !important;
+}
 
-html.dark input, html.dark select, html.dark textarea {
+/* ===== CAMPOS DE ENTRADA, SELECTS Y TEXTAREAS ===== */
+html.dark input,
+html.dark select,
+html.dark textarea,
+html.dark .form-grid input,
+html.dark .form-grid select,
+html.dark .form-grid textarea,
+html.dark .form-card input,
+html.dark .form-card select,
+html.dark .form-card textarea {
   background: #0f172a !important;
   border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+html.dark input:focus,
+html.dark select:focus,
+html.dark textarea:focus {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important;
+}
+
+html.dark input[readonly],
+html.dark select:disabled,
+html.dark .cursor-not-allowed {
+  background: #090e17 !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+/* ===== MODAL DE CONFIRMACIÓN Y DIÁLOGOS EMERGENTES ===== */
+html.dark #modalRadicacionExitosa > div,
+html.dark .odin-modal-card {
+  background: #1e293b !important;
+  border-color: #059669 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+  color: #f8fafc !important;
+}
+
+html.dark #modalRadicacionExitosa h2 {
+  color: #f8fafc !important;
+}
+
+html.dark #modalRadicacionExitosa .bg-slate-50,
+html.dark #modalRadicacionExitosa .bg-slate-50\/70 {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+html.dark #modalRadicacionExitosa .text-slate-700 {
   color: #e2e8f0 !important;
 }
 
-/* ===== SIDEBAR + SUBMENÚS: texto siempre legible ===== */
+html.dark #modalRadicacionExitosa .bg-slate-200 {
+  background: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark #modalRadicacionExitosa .border-slate-100 {
+  border-color: #334155 !important;
+}
+
+html.dark #modalRadicacionExitosa button.bg-slate-100 {
+  background: #334155 !important;
+  color: #e2e8f0 !important;
+}
+html.dark #modalRadicacionExitosa button.bg-slate-100:hover {
+  background: #475569 !important;
+  color: #ffffff !important;
+}
+
+/* ===== SIDEBAR + SUBMENÚS ===== */
 html.dark #main-sidebar,
 html.dark aside {
   background: #0f172a !important;
@@ -97,23 +241,48 @@ html.dark #main-sidebar .text-green-700 {
   color: #86efac !important;
 }
 
+/* ===== BOTONES Y BORDES ===== */
 html.dark .alert-summary {
   background: #3f1d1d !important;
   border-color: #7f1d1d !important;
   color: #fecaca !important;
 }
-html.dark .btn-secondary, html.dark .mass-actions button {
+html.dark .btn-secondary,
+html.dark .mass-actions button {
   background: #1e293b !important;
   border-color: #475569 !important;
   color: #e2e8f0 !important;
 }
-html.dark .border-slate-200, html.dark .border-slate-100 {
+html.dark .btn-secondary:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+}
+html.dark .border-slate-200,
+html.dark .border-slate-100 {
   border-color: #334155 !important;
 }
 
+/* Notificaciones y popovers */
 #odinNotifPanel { min-width: 18rem; max-width: 22rem; box-shadow: 0 10px 40px rgba(0,0,0,.25); }
 html.dark #odinNotifPanel {
   background: #1e293b !important;
   border-color: #475569 !important;
   color: #e2e8f0 !important;
+}
+html.dark #odinNotifPanel .bg-slate-50 {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+/* ===== LOGO Y MARCA ODIN (CONTRASTE ALTO) ===== */
+html.dark .odin-brand-title,
+html.dark .sidebar-brand-text .odin-brand-title,
+html.dark #main-sidebar .odin-brand-title,
+html.dark .odin-brand-lockup strong,
+html.dark .odin-brand-text strong,
+html.dark .odin-login-brand-text strong,
+html.dark h1.mt-3,
+html.dark .odin-brand-title-contrast {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }

@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | ODIN</title>
+    <script>
+      try { if (localStorage.getItem('odin-theme') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
+    </script>
     <script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/odin.css}">
+    <link rel="stylesheet" th:href="@{/css/odin-dark.css}">
     <style>body{font-family:Inter,Arial,sans-serif}.chart-box{position:relative;min-height:300px}</style>
 </head>
 <body class="bg-[#f5f6f8] text-slate-800">
 <div class="min-h-screen flex">
-    <div th:replace="fragments/layout :: sidebar('dashboard')"></div>
+    <div th:replace="~{fragments/layout :: sidebar('dashboard')}"></div>
     <div class="fixed inset-0 bg-black/40 z-20 hidden" id="overlay"></div>
     <div class="flex-1 min-w-0">
-        <div th:replace="fragments/layout :: topbar('ODIN')"></div>
+        <div th:replace="~{fragments/layout :: topbar('ODIN')}"></div>
         <main class="px-4 md:px-8 py-6">
             <section class="mb-8"><h1 class="text-3xl font-extrabold text-slate-900 uppercase">Dashboard</h1><p class="text-sm text-slate-500 mt-2">Resumen operativo de la gestión documental de ODIN.</p></section>
 
@@ -51,8 +56,17 @@
 </div>
 <style>.card{background:#fff;border:1px solid #e2e8f0;border-radius:.75rem;padding:1rem;box-shadow:0 1px 2px #0000000d;transition:.2s;display:block}.card:hover{box-shadow:0 4px 12px #00000014}.card span{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;color:#64748b}.card strong{display:block;font-size:1.55rem;font-weight:800;margin-top:.25rem}.badge{padding:.25rem .5rem;border-radius:9999px;font-size:.7rem}</style>
 <script defer th:src="@{/js/script.js}"></script>
+<script defer th:src="@{/js/odin-ui.js}"></script>
 <script th:inline="javascript">
-const labels=['Pendientes','En trámite','Finalizados','Rechazados','Vencidos'];const values=[[[${pendientes?:0}]],[[${enTramite?:0}]],[[${finalizados?:0}]],[[${rechazados?:0}]],[[${vencidos?:0}]]];const colors=['#FBBF24','#60A5FA','#34D399','#F87171','#991B1B'];
+const labels = ['Pendientes', 'En trámite', 'Finalizados', 'Rechazados', 'Vencidos'];
+/*<![CDATA[*/
+const pendientes = /*[[${pendientes}]]*/ 0;
+const enTramite = /*[[${enTramite}]]*/ 0;
+const finalizados = /*[[${finalizados}]]*/ 0;
+const rechazados = /*[[${rechazados}]]*/ 0;
+const vencidos = /*[[${vencidos}]]*/ 0;
+const values = [Number(pendientes) || 0, Number(enTramite) || 0, Number(finalizados) || 0, Number(rechazados) || 0, Number(vencidos) || 0];
+/*]]>*/const colors=['#FBBF24','#60A5FA','#34D399','#F87171','#991B1B'];
 const d=document.getElementById('estadoChart');if(d)new Chart(d,{type:'doughnut',data:{labels,datasets:[{data:values,backgroundColor:colors,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
 const b=document.getElementById('dashboardChart');if(b)new Chart(b,{type:'bar',data:{labels,datasets:[{label:'Radicados',data:values,backgroundColor:colors,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0}}},plugins:{legend:{display:false}}}});
 </script></body></html>
