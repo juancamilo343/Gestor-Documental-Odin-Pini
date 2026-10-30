@@ -35,6 +35,8 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Controller
@@ -161,10 +163,12 @@ public class RadicadosView {
                         radicado
                 );
 
+        List<String> nombresArchivosGuardados = new java.util.ArrayList<>();
         int archivosGuardados =
                 guardarArchivos(
                         savedRadicado,
-                        radicado.getArchivos()
+                        radicado.getArchivos(),
+                        nombresArchivosGuardados
                 );
 
         String mensaje =
@@ -192,6 +196,16 @@ public class RadicadosView {
         ra.addFlashAttribute(
                 "archivos",
                 archivosGuardados
+        );
+
+        ra.addFlashAttribute(
+                "nombresArchivos",
+                nombresArchivosGuardados
+        );
+
+        ra.addFlashAttribute(
+                "radicacionExitosa",
+                true
         );
 
         return "redirect:"
@@ -290,23 +304,25 @@ public class RadicadosView {
         }
 
         /*
-         * Fecha de radicación.
+         * Normalización estricta de prioridad según la restricción 'radicados_prioridad_check':
+         * Valores válidos en PostgreSQL: 'BAJA', 'MEDIA', 'ALTA', 'URGENTE'.
+         * Si llega nula, vacía o 'NORMAL', se normaliza a 'MEDIA'.
          */
-        if (!tieneTexto(
-                radicado.getFecha_radicado()
-        )) {
-
-            String fecha =
-                    tieneTexto(
-                            radicado.getFechaDocumento()
-                    )
-                            ? radicado.getFechaDocumento()
-                            : LocalDateTime.now()
-                            .toLocalDate()
-                            .toString();
-
-            radicado.setFecha_radicado(fecha);
+        String prio = radicado.getPrioridad();
+        if (!tieneTexto(prio) || "NORMAL".equalsIgnoreCase(prio)) {
+            prio = "MEDIA";
+        } else {
+            prio = prio.trim().toUpperCase();
+            if (!prio.matches("BAJA|MEDIA|ALTA|URGENTE")) {
+                prio = "MEDIA";
+            }
         }
+        radicado.setPrioridad(prio);
+
+        /*
+         * Fecha de radicación oficial inmutable (se genera automáticamente con la fecha y hora actual).
+         */
+        radicado.setFecha_radicado(LocalDateTime.now().toLocalDate().toString());
 
         /*
          * Evita mandar "" hacia las FK
@@ -507,7 +523,8 @@ public class RadicadosView {
 
     private int guardarArchivos(
             Radicados radicado,
-            MultipartFile[] archivos) {
+            MultipartFile[] archivos,
+            List<String> nombresGuardados) {
 
         if (archivos == null
                 || archivos.length == 0) {
@@ -607,6 +624,10 @@ public class RadicadosView {
                 documento.setMime_type(archivo.getContentType());
                 documento.setVersion_actual(1);
                 documentosService.guardar(documento, radicado.getId_usuario(), "Versión inicial");
+
+                if (nombresGuardados != null) {
+                    nombresGuardados.add(nombreOriginal);
+                }
 
                 guardados++;
             }

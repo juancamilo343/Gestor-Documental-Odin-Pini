@@ -58,7 +58,75 @@
                     </span>
                 </div>
 
-                <div th:if="${success}" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 border border-green-200">
+                <!-- Ventana emergente (Modal) de Confirmación de Radicación Exitosa -->
+                <div th:if="${radicacionExitosa == true}" id="modalRadicacionExitosa" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300">
+                    <div class="relative w-full max-w-lg bg-white rounded-2xl border-2 border-emerald-500 shadow-2xl p-6 transform transition-all scale-100 animate-in fade-in zoom-in-95">
+                        
+                        <!-- Encabezado con Icono Destacado -->
+                        <div class="flex items-center gap-3.5 mb-4">
+                            <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-2xl font-bold shrink-0 shadow-inner">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">¡Radicación exitosa!</h2>
+                                <p class="text-xs text-slate-500 mt-0.5">El documento oficial ha sido registrado e incorporado satisfactoriamente al repositorio de ODIN.</p>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta de Datos Clave -->
+                        <div class="grid grid-cols-2 gap-3 p-4 bg-slate-50 border border-slate-200/80 rounded-xl text-xs mb-4">
+                            <div>
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Número de Radicado</span>
+                                <span class="text-base font-extrabold text-emerald-700 tracking-wide font-mono" th:text="${savedRadicado != null ? savedRadicado.numero_radicado : 'E-2026-000001'}">E-2026-000001</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fecha de Radicación</span>
+                                <span class="text-sm font-semibold text-slate-700" th:text="${savedRadicado != null ? savedRadicado.fecha_radicado : ''}">29/10/2026</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tipo de Radicado</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 mt-0.5">
+                                    <i class="fas fa-inbox mr-1"></i> ENTRADA
+                                </span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Prioridad Asignada</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold mt-0.5"
+                                      th:classappend="${savedRadicado != null and savedRadicado.prioridad == 'URGENTE'} ? 'bg-red-100 text-red-800' : (${savedRadicado != null and savedRadicado.prioridad == 'ALTA'} ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800')"
+                                      th:text="${savedRadicado != null ? savedRadicado.prioridad : 'MEDIA'}">MEDIA</span>
+                            </div>
+                        </div>
+
+                        <!-- Anexos Digitales Almacenados -->
+                        <div class="mb-5 p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl text-xs">
+                            <span class="block font-bold text-slate-600 uppercase mb-1.5 flex items-center justify-between">
+                                <span><i class="fas fa-paperclip text-slate-400 mr-1.5"></i> Documentos almacenados:</span>
+                                <span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-bold" th:text="${archivos != null ? archivos : 0}">0</span>
+                            </span>
+                            <ul th:if="${nombresArchivos != null and not #lists.isEmpty(nombresArchivos)}" class="space-y-1.5 pl-1 max-h-28 overflow-y-auto">
+                                <li th:each="doc : ${nombresArchivos}" class="text-xs text-slate-700 flex items-center gap-2">
+                                    <i class="fas fa-file-pdf text-red-500"></i>
+                                    <span class="font-medium truncate" th:text="${doc}">documento.pdf</span>
+                                </li>
+                            </ul>
+                            <p th:if="${nombresArchivos == null or #lists.isEmpty(nombresArchivos)}" class="text-xs text-slate-400 italic">
+                                Sin archivos adjuntos digitales en este registro.
+                            </p>
+                        </div>
+
+                        <!-- Botones de Acción del Modal -->
+                        <div class="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                            <button type="button" onclick="window.print()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition inline-flex items-center gap-1.5">
+                                <i class="fas fa-print"></i> Imprimir Rótulo
+                            </button>
+                            <button type="button" onclick="cerrarModalRadicacion()" class="px-5 py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg shadow-sm transition inline-flex items-center gap-1.5">
+                                <i class="fas fa-check"></i> Cerrar y Continuar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${success != null and not #strings.isEmpty(success) and radicacionExitosa != true}" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 border border-green-200">
                     <i class="fas fa-check-circle mr-1"></i> <span th:text="${success}"></span>
                 </div>
 
@@ -88,7 +156,7 @@
                             </div>
                             <div>
                                 <label>Tipo de documento</label>
-                                <select th:field="*{tipoDocumento}">
+                                <select id="selectTipoDocumento" th:field="*{tipoDocumento}" onchange="onTipoDocumentoChange(this)">
                                     <option value="">Seleccione...</option>
                                     <option value="OFICIO">Oficio</option>
                                     <option value="MEMORANDO">Memorando</option>
@@ -195,17 +263,25 @@
                                 </select>
                             </div>
                             <div>
-                                <label>Prioridad</label>
-                                <select id="selectPrioridad" th:field="*{prioridad}">
-                                    <option value="NORMAL">Normal / Media</option>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="mb-0">Prioridad asignada (automática)</label>
+                                    <span id="badgePrioridad" class="text-xs px-2 py-0.5 rounded-full font-semibold bg-blue-100 text-blue-800">Media</span>
+                                </div>
+                                <select id="selectPrioridad" th:field="*{prioridad}" class="bg-slate-100 text-slate-700 font-semibold cursor-not-allowed pointer-events-none" tabindex="-1">
+                                    <option value="BAJA">Baja</option>
+                                    <option value="MEDIA">Normal / Media</option>
                                     <option value="ALTA">Alta</option>
                                     <option value="URGENTE">Urgente</option>
                                 </select>
+                                <p class="hint">Determinada automáticamente según el trámite y tipo documental.</p>
                             </div>
                             <div>
-                                <label>Fecha de vencimiento (calculada)</label>
-                                <input type="date" id="fechaVencimiento" th:field="*{fecha_vencimiento}">
-                                <p class="hint">Calculada automáticamente según los días de respuesta del trámite.</p>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="mb-0">Fecha límite de respuesta</label>
+                                    <span id="badgeDiasRestantes" class="hidden text-xs px-2 py-0.5 rounded-full font-semibold"></span>
+                                </div>
+                                <input type="date" id="fechaVencimiento" th:field="*{fecha_vencimiento}" readonly class="bg-slate-100 text-slate-700 font-semibold cursor-not-allowed">
+                                <p class="hint">Calculada automáticamente según los días de respuesta configurados en el trámite.</p>
                             </div>
                         </div>
                     </div>
@@ -336,37 +412,159 @@ if (inputNumDoc) {
     });
 }
 
+// --- CONTROL DEL MODAL EMERGENTE DE RADICACIÓN EXITOSA ---
+function cerrarModalRadicacion() {
+    const modal = document.getElementById('modalRadicacionExitosa');
+    if (modal) {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => modal.remove(), 250);
+    }
+}
+
+// --- AUTOMATIZACIÓN DE PRIORIDAD SEGÚN TRÁMITE Y TIPO DOCUMENTAL ---
+function actualizarPrioridadAutomatica() {
+    const selTramite = document.getElementById('selectTramite');
+    const selTipoDoc = document.getElementById('selectTipoDocumento');
+    const selPrio = document.getElementById('selectPrioridad');
+    const badgePrio = document.getElementById('badgePrioridad');
+    if (!selPrio) return;
+
+    let prioCalculada = 'MEDIA'; // Base institucional estándar
+
+    // Prioridad por trámite
+    let prioTramite = '';
+    if (selTramite && selTramite.selectedIndex > 0) {
+        const opt = selTramite.options[selTramite.selectedIndex];
+        prioTramite = (opt.getAttribute('data-prioridad') || '').trim().toUpperCase();
+    }
+
+    // Prioridad por tipo de documento
+    let prioDoc = '';
+    if (selTipoDoc && selTipoDoc.value) {
+        const valDoc = selTipoDoc.value.toUpperCase();
+        if (valDoc === 'PETICION' || valDoc === 'QUEJA') {
+            prioDoc = 'ALTA';
+        } else if (valDoc === 'MEMORANDO' || valDoc === 'OFICIO') {
+            prioDoc = 'MEDIA';
+        } else if (valDoc === 'OTRO') {
+            prioDoc = 'BAJA';
+        }
+    }
+
+    // Regla de jerarquía institucional: URGENTE > ALTA > MEDIA > BAJA
+    const jerarquia = { 'URGENTE': 4, 'ALTA': 3, 'MEDIA': 2, 'BAJA': 1 };
+    let scoreTramite = jerarquia[prioTramite] || 0;
+    let scoreDoc = jerarquia[prioDoc] || 0;
+
+    if (scoreTramite > 0 || scoreDoc > 0) {
+        prioCalculada = (scoreTramite >= scoreDoc) ? prioTramite : prioDoc;
+    }
+
+    // Normalizar a valores estrictos de la restricción 'radicados_prioridad_check'
+    if (!['BAJA', 'MEDIA', 'ALTA', 'URGENTE'].includes(prioCalculada)) {
+        prioCalculada = 'MEDIA';
+    }
+
+    selPrio.value = prioCalculada;
+
+    // Actualizar badge visual
+    if (badgePrio) {
+        badgePrio.className = 'text-xs px-2 py-0.5 rounded-full font-semibold';
+        if (prioCalculada === 'URGENTE') {
+            badgePrio.classList.add('bg-red-100', 'text-red-800');
+            badgePrio.textContent = 'Urgente';
+        } else if (prioCalculada === 'ALTA') {
+            badgePrio.classList.add('bg-amber-100', 'text-amber-800');
+            badgePrio.textContent = 'Alta';
+        } else if (prioCalculada === 'BAJA') {
+            badgePrio.classList.add('bg-slate-100', 'text-slate-700');
+            badgePrio.textContent = 'Baja';
+        } else {
+            badgePrio.classList.add('bg-blue-100', 'text-blue-800');
+            badgePrio.textContent = 'Normal / Media';
+        }
+    }
+}
+
+function onTipoDocumentoChange(select) {
+    actualizarPrioridadAutomatica();
+}
+
 // --- REACTIVIDAD DE TRÁMITES (PLAZOS Y ASIGNACIÓN AUTOMÁTICA) ---
 function onTramiteChange(select) {
     const selected = select.options[select.selectedIndex];
-    if (!selected || !selected.value) return;
+    const inputVenc = document.getElementById('fechaVencimiento');
+    const badge = document.getElementById('badgeDiasRestantes');
 
-    const dias = parseInt(selected.getAttribute('data-dias')) || 15;
-    const prioridad = selected.getAttribute('data-prioridad');
-    const dep = selected.getAttribute('data-dependencia');
+    // 1. Asignar prioridad automática según trámite y tipo documental
+    actualizarPrioridadAutomatica();
 
-    // 1. Asignar prioridad default si existe
-    if (prioridad) {
-        const selPrio = document.getElementById('selectPrioridad');
-        if (selPrio) selPrio.value = prioridad.toUpperCase().includes('ALTA') ? 'ALTA' : (prioridad.toUpperCase().includes('URG') ? 'URGENTE' : 'NORMAL');
+    if (!selected || !selected.value) {
+        if (inputVenc) inputVenc.value = '';
+        if (badge) {
+            badge.className = 'hidden';
+            badge.textContent = '';
+        }
+        return;
     }
 
-    // 2. Calcular fecha de vencimiento (hoy + días)
+    const diasAttr = selected.getAttribute('data-dias');
+    const dias = (diasAttr !== null && diasAttr !== '') ? parseInt(diasAttr) : 15;
+    const dep = selected.getAttribute('data-dependencia');
+
+    // 2. Calcular fecha límite / vencimiento (hoy + días calendario según lógica existente)
     const hoy = new Date();
-    hoy.setDate(hoy.getDate() + dias);
-    const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dd = String(hoy.getDate()).padStart(2, '0');
-    const inputVenc = document.getElementById('fechaVencimiento');
+    hoy.setHours(0, 0, 0, 0);
+    const fechaLimite = new Date(hoy);
+    fechaLimite.setDate(fechaLimite.getDate() + dias);
+
+    const yyyy = fechaLimite.getFullYear();
+    const mm = String(fechaLimite.getMonth() + 1).padStart(2, '0');
+    const dd = String(fechaLimite.getDate()).padStart(2, '0');
     if (inputVenc) inputVenc.value = `${yyyy}-${mm}-${dd}`;
 
-    // 3. Asignar dependencia responsable si está definida en el trámite
+    // 3. Actualizar indicador visual de días restantes
+    actualizarIndicadorDias(dias);
+
+    // 4. Asignar dependencia responsable si está configurada en el trámite
     if (dep) {
         const selDep = document.getElementById('selectDependencia');
         if (selDep) {
             selDep.value = dep;
             onDependenciaChange(selDep);
         }
+    }
+}
+
+// Función para formatear e ilustrar el estado del plazo
+function actualizarIndicadorDias(dias) {
+    const badge = document.getElementById('badgeDiasRestantes');
+    if (!badge) return;
+
+    badge.className = 'text-xs px-2 py-0.5 rounded-full font-semibold inline-flex items-center gap-1';
+
+    if (dias > 3) {
+        // Plazo normal disponible
+        badge.classList.add('bg-emerald-100', 'text-emerald-800');
+        badge.innerHTML = `<i class="fas fa-clock mr-1"></i>Faltan ${dias} días para responder`;
+    } else if (dias > 1 && dias <= 3) {
+        // Plazo próximo a vencer (2 a 3 días)
+        badge.classList.add('bg-amber-100', 'text-amber-800');
+        badge.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i>Faltan ${dias} días para responder`;
+    } else if (dias === 1) {
+        // Falta 1 día (singular)
+        badge.classList.add('bg-orange-100', 'text-orange-800');
+        badge.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i>Falta 1 día para responder`;
+    } else if (dias === 0) {
+        // Vence hoy
+        badge.classList.add('bg-orange-200', 'text-orange-900', 'font-bold');
+        badge.innerHTML = `<i class="fas fa-bolt mr-1"></i>El plazo vence hoy`;
+    } else {
+        // Plazo vencido (dias < 0)
+        const vencidos = Math.abs(dias);
+        badge.classList.add('bg-red-100', 'text-red-800', 'font-bold');
+        const plural = vencidos === 1 ? 'día' : 'días';
+        badge.innerHTML = `<i class="fas fa-times-circle mr-1"></i>Plazo vencido hace ${vencidos} ${plural}`;
     }
 }
 
