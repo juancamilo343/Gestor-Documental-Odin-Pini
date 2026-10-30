@@ -371,44 +371,135 @@ function toggleAnonimo(cb) {
     }
 }
 
-// --- AUTOCOMPLETADO DE REMITENTE AL DIGITAR DOCUMENTO ---
+// --- AUTOCOMPLETADO DE REMITENTE / SOLICITANTE MEDIANTE NÚMERO DE IDENTIFICACIÓN ---
 let debounceRemitente = null;
+let ultimaIdentificacionConsultada = '';
 const inputNumDoc = document.getElementById('numeroIdentificacion');
+
+function ejecutarConsultaRemitente(valor) {
+    const feedback = document.getElementById('remitenteFeedback');
+    const spinner = document.getElementById('remitenteSpinner');
+    const cbAnonimo = document.getElementById('anonimo');
+
+    // Si está en modo radicación anónima, no ejecutar búsquedas
+    if (cbAnonimo && cbAnonimo.checked) {
+        if (spinner) spinner.classList.add('hidden');
+        return;
+    }
+
+    if (!valor || valor.length < 4) {
+        if (spinner) spinner.classList.add('hidden');
+        if (feedback) {
+            feedback.innerHTML = valor.length > 0 && valor.length < 4
+                ? '<span class="text-slate-400 text-xs"><i class="fas fa-info-circle mr-1"></i> Ingrese al menos 4 dígitos para consultar en el sistema.</span>'
+                : '';
+        }
+        return;
+    }
+
+    // Evitar consultar nuevamente el mismo valor si ya fue procesado
+    if (valor === ultimaIdentificacionConsultada) {
+        return;
+    }
+
+    // Estado: Búsqueda en progreso
+    if (spinner) spinner.classList.remove('hidden');
+    if (feedback) {
+        feedback.innerHTML = '<span class="text-slate-500 text-xs"><i class="fas fa-spinner fa-spin mr-1"></i> Consultando registros en el sistema...</span>';
+    }
+
+    fetch('/api/remitentes/' + encodeURIComponent(valor))
+        .then(function(r) {
+            return r.json().then(function(data) {
+                return { status: r.status, ok: r.ok, body: data };
+            });
+        })
+        .then(function(res) {
+            if (spinner) spinner.classList.add('hidden');
+            ultimaIdentificacionConsultada = valor;
+
+            if (res.ok && res.body && res.body.success && res.body.data) {
+                // Estado: Persona encontrada (en Gestión de Usuarios o Remitentes Frecuentes)
+                const d = res.body.data;
+                const nombreVal = d.nombre_completo || d.nombre;
+                const nombreInput = document.getElementById('remitenteNombre');
+                const correoInput = document.getElementById('correoSolicitante');
+                const telInput = document.getElementById('telefonoSolicitante');
+                const dirInput = document.getElementById('ciudadSolicitante');
+
+                // Autocompletar solo los campos con correspondencia real y que contengan datos
+                if (nombreInput && nombreVal) nombreInput.value = nombreVal;
+                if (correoInput && d.correo) correoInput.value = d.correo;
+                if (telInput && d.telefono) telInput.value = d.telefono;
+                if (dirInput && d.direccion) dirInput.value = d.direccion;
+
+                // Mensaje informativo del origen
+                if (feedback) {
+                    if (res.body.origen === 'USUARIO') {
+                        feedback.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">' +
+                            '<i class="fas fa-check-circle mr-1"></i> Persona registrada en Gestión de Usuarios. Datos autocompletados.</span>';
+                    } else {
+                        feedback.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">' +
+                            '<i class="fas fa-check-circle mr-1"></i> Remitente frecuente encontrado. Datos autocompletados.</span>';
+                    }
+                }
+            } else {
+                // Estado: Persona no registrada (C. Conservar datos diligenciados y habilitar ingreso manual)
+                if (feedback) {
+                    feedback.innerHTML = '<span class="text-slate-600 dark:text-slate-300 text-xs">' +
+                        '<i class="fas fa-info-circle text-blue-500 mr-1"></i> Persona no registrada en Gestión de Usuarios. Puede ingresar los datos manualmente.</span>';
+                }
+            }
+        })
+        .catch(function(err) {
+            // Estado: Error de consulta (D.5 y C.5: no bloquear el proceso de radicación)
+            if (spinner) spinner.classList.add('hidden');
+            if (feedback) {
+                feedback.innerHTML = '<span class="text-amber-600 dark:text-amber-400 text-xs">' +
+                    '<i class="fas fa-exclamation-triangle mr-1"></i> No fue posible consultar el registro en este momento. Puede ingresar los datos manualmente.</span>';
+            }
+        });
+}
+
 if (inputNumDoc) {
+    // Consulta con debounce mientras el usuario digita para evitar peticiones innecesarias
     inputNumDoc.addEventListener('input', function() {
         clearTimeout(debounceRemitente);
         const valor = this.value.trim();
-        const feedback = document.getElementById('remitenteFeedback');
-        const spinner = document.getElementById('remitenteSpinner');
 
-        if (valor.length < 3) {
-            if (feedback) feedback.textContent = '';
+        if (valor === '') {
+            ultimaIdentificacionConsultada = '';
+            const feedback = document.getElementById('remitenteFeedback');
+            const spinner = document.getElementById('remitenteSpinner');
+            if (spinner) spinner.classList.add('hidden');
+            if (feedback) feedback.innerHTML = '';
             return;
         }
 
-        debounceRemitente = setTimeout(() => {
-            if (spinner) spinner.classList.remove('hidden');
-            fetch('/api/remitentes/' + encodeURIComponent(valor))
-                .then(r => r.json())
-                .then(res => {
-                    if (spinner) spinner.classList.add('hidden');
-                    if (res.success && res.data) {
-                        const d = res.data;
-                        document.getElementById('remitenteNombre').value = d.nombre_completo || d.nombre || '';
-                        if (d.correo) document.getElementById('correoSolicitante').value = d.correo;
-                        if (d.telefono) document.getElementById('telefonoSolicitante').value = d.telefono;
-                        if (d.direccion) document.getElementById('ciudadSolicitante').value = d.direccion;
-                        if (feedback) {
-                            feedback.innerHTML = '<span class="text-emerald-600 font-semibold"><i class="fas fa-check"></i> Remitente recurrente encontrado</span>';
-                        }
-                    } else {
-                        if (feedback) feedback.textContent = 'Nuevo remitente (se registrará automáticamente).';
-                    }
-                })
-                .catch(() => {
-                    if (spinner) spinner.classList.add('hidden');
-                });
-        }, 350);
+        debounceRemitente = setTimeout(function() {
+            ejecutarConsultaRemitente(valor);
+        }, 450);
+    });
+
+    // Consulta inmediata al perder el foco (blur) si no se ha consultado aún
+    inputNumDoc.addEventListener('blur', function() {
+        clearTimeout(debounceRemitente);
+        const valor = this.value.trim();
+        if (valor.length >= 4 && valor !== ultimaIdentificacionConsultada) {
+            ejecutarConsultaRemitente(valor);
+        }
+    });
+
+    // Permitir consulta inmediata al presionar tecla Enter sin enviar el formulario
+    inputNumDoc.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(debounceRemitente);
+            const valor = this.value.trim();
+            if (valor.length >= 4) {
+                ejecutarConsultaRemitente(valor);
+            }
+        }
     });
 }
 
